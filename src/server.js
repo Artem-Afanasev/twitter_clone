@@ -2,18 +2,19 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import app from './app.js';
-import mongoose from 'mongoose';
+import { sequelize } from './models/index.js';
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, console.log('Server is running'));
+sequelize
+    .sync({ force: false })
+    .then(() => {
+        console.log('✅ Database synced');
 
-// mongoose
-//     .connect('mongodb://localhost:27017/twitter-clone')
-//     .then(() => {
-//         console.log('✅ Connected to DB');
-//         app.listen(PORT, () =>
-//             console.log(`🚀 Server running on port ${PORT}`)
-//         );
-//     })
-//     .catch((err) => console.error('❌ DB connection error:', err));
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('❌ Database connection failed:', error);
+    });

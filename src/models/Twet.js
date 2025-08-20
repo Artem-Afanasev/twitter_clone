@@ -1,13 +1,26 @@
-const TweetSchema = new mongoose.Schema(
+import { DataTypes } from 'sequelize';
+import { sequelize } from './index.js';
+
+const Tweet = sequelize.define(
+    'Tweet',
     {
-        content: { type: String, required: true, maxlength: 280 },
-        author: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',
-            required: true,
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
         },
-        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        retweets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        content: {
+            type: DataTypes.STRING(280),
+            allowNull: false,
+            validate: {
+                notEmpty: true,
+            },
+        },
     },
-    { timestamps: true }
+    {
+        tableName: 'tweets',
+        timestamps: true,
+    }
 );
+
+export default Tweet;
