@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from './index.js';
+import User from './Users.js';
 
 const Tweet = sequelize.define(
     'Tweet',
@@ -14,6 +15,15 @@ const Tweet = sequelize.define(
             allowNull: false,
             validate: {
                 notEmpty: true,
+                len: [1, 280],
+            },
+        },
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: User,
+                key: 'id',
             },
         },
     },
@@ -22,5 +32,8 @@ const Tweet = sequelize.define(
         timestamps: true,
     }
 );
+
+Tweet.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Tweet, { foreignKey: 'userId' });
 
 export default Tweet;

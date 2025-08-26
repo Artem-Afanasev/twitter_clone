@@ -1,3 +1,4 @@
+// App.tsx - добавить Navigation
 import React, { useState, useEffect } from 'react';
 import {
     BrowserRouter as Router,
@@ -9,13 +10,13 @@ import Register from './pages/register';
 import Login from './pages/login';
 import Profile from './pages/profile';
 import ProtectedRoute from './components/ProtectedRoute';
+import Navigation from './components/Navigation'; // ← Добавляем импорт
 import './App.css';
 
 const App: React.FC = () => {
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        // Восстанавливаем пользователя из localStorage при загрузке
         const storedUser = localStorage.getItem('user');
         const storedToken = localStorage.getItem('token');
 
@@ -30,15 +31,12 @@ const App: React.FC = () => {
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
-    const handleLogout = () => {
-        setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-    };
-
     return (
         <Router>
             <div className="App">
+                {/* Добавляем навигацию */}
+                <Navigation />
+
                 <Routes>
                     <Route
                         path="/login"

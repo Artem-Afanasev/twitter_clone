@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { authAPI, RegisterResponse } from '../services/api'; // ← добавляем импорт типа
+import { Link } from 'react-router-dom';
 
 const Register: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -79,6 +80,21 @@ const Register: React.FC = () => {
                         width: '100%',
                     }}
                 />
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p>
+                        Уже есть аккаунт?
+                        <Link
+                            to="/login"
+                            style={{
+                                marginLeft: '5px',
+                                color: '#007bff',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Войти
+                        </Link>
+                    </p>
+                </div>
                 <button
                     type="submit"
                     style={{ padding: '10px 20px', margin: '10px 0' }}

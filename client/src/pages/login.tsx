@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { authAPI, AuthResponse } from '../services/api'; // ← добавляем импорт типа
+import { Link } from 'react-router-dom';
 
 interface LoginProps {
     onLogin: (token: string, user: any) => void;
@@ -68,6 +69,21 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         width: '100%',
                     }}
                 />
+                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p>
+                        Нет аккаунта?
+                        <Link
+                            to="/register"
+                            style={{
+                                marginLeft: '5px',
+                                color: '#007bff',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            Зарегистрироваться
+                        </Link>
+                    </p>
+                </div>
                 <button
                     type="submit"
                     style={{ padding: '10px 20px', margin: '10px 0' }}
