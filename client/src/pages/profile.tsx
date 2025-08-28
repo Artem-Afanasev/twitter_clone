@@ -1,6 +1,9 @@
 // pages/Profile.tsx
 import React, { useState, useEffect } from 'react';
 import { profileAPI, User } from '../services/api';
+import CreatePost from '../components/CreatePost';
+import UserPosts from '../components/UserPosts';
+import '../styles/Profile.css';
 
 const Profile: React.FC = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -74,156 +77,138 @@ const Profile: React.FC = () => {
     };
 
     if (loading) {
-        return <div style={{ padding: '20px' }}>Загрузка...</div>;
+        return (
+            <div
+                style={{
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#657786',
+                    paddingTop: '50px',
+                }}
+            >
+                Загрузка профиля...
+            </div>
+        );
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '20px',
-                }}
-            >
-                <h2>Профиль пользователя</h2>
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        padding: '8px 16px',
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                    }}
-                >
-                    Выйти
-                </button>
+        <div className="profile-container">
+            <div className="profile-layout">
+                {/* Левая колонка - информация о пользователе */}
+                <div className="profile-sidebar">
+                    <div className="user-card">
+                        <div className="user-avatar">
+                            {user?.username?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+
+                        <h2 className="username">@{user?.username}</h2>
+
+                        <div className="user-info">
+                            <div className="info-item">
+                                <span className="label">📧 Email:</span>
+                                <span className="value">{user?.email}</span>
+                            </div>
+
+                            <div className="info-item">
+                                <span className="label">🆔 ID:</span>
+                                <span className="value">#{user?.id}</span>
+                            </div>
+
+                            <div className="info-item">
+                                <span className="label">📅 Регистрация:</span>
+                                <span className="value">
+                                    {user?.createdAt
+                                        ? new Date(
+                                              user.createdAt
+                                          ).toLocaleDateString('ru-RU')
+                                        : 'Неизвестно'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="profile-actions">
+                            <button
+                                onClick={() => setEditMode(true)}
+                                className="edit-btn"
+                            >
+                                ✏️ Редактировать
+                            </button>
+
+                            <button
+                                onClick={handleLogout}
+                                className="logout-btn"
+                            >
+                                🚪 Выйти
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Форма редактирования */}
+                    {editMode && (
+                        <div className="edit-form">
+                            <h3>✏️ Редактирование профиля</h3>
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-group">
+                                    <label>Имя пользователя:</label>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label>Email:</label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-buttons">
+                                    <button type="submit" className="save-btn">
+                                        💾 Сохранить
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setEditMode(false);
+                                            setFormData({
+                                                username: user?.username || '',
+                                                email: user?.email || '',
+                                            });
+                                        }}
+                                        className="cancel-btn"
+                                    >
+                                        ❌ Отмена
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+                </div>
+
+                {/* Правая колонка - посты */}
+                <div className="profile-content">
+                    {/* Создание нового поста */}
+                    <CreatePost />
+
+                    {/* Лента постов пользователя */}
+                    {user && <UserPosts />}
+                </div>
             </div>
 
-            {!editMode ? (
-                <div>
-                    <div style={{ marginBottom: '20px' }}>
-                        <p>
-                            <strong>ID:</strong> {user?.id}
-                        </p>
-                        <p>
-                            <strong>Имя пользователя:</strong> {user?.username}
-                        </p>
-                        <p>
-                            <strong>Email:</strong> {user?.email}
-                        </p>
-                    </div>
-                    <button
-                        onClick={() => setEditMode(true)}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                        }}
-                    >
-                        Редактировать профиль
-                    </button>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit}>
-                    <div style={{ marginBottom: '15px' }}>
-                        <label
-                            style={{ display: 'block', marginBottom: '5px' }}
-                        >
-                            Имя пользователя:
-                        </label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                padding: '8px',
-                                width: '100%',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                            }}
-                        />
-                    </div>
-                    <div style={{ marginBottom: '15px' }}>
-                        <label
-                            style={{ display: 'block', marginBottom: '5px' }}
-                        >
-                            Email:
-                        </label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            style={{
-                                padding: '8px',
-                                width: '100%',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                            }}
-                        />
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button
-                            type="submit"
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#28a745',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Сохранить
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setEditMode(false);
-                                setFormData({
-                                    username: user?.username || '',
-                                    email: user?.email || '',
-                                });
-                            }}
-                            style={{
-                                padding: '10px 20px',
-                                backgroundColor: '#6c757d',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Отмена
-                        </button>
-                    </div>
-                </form>
-            )}
-
+            {/* Сообщения */}
             {message && (
                 <div
-                    style={{
-                        marginTop: '20px',
-                        padding: '10px',
-                        backgroundColor: message.includes('✅')
-                            ? '#d4edda'
-                            : '#f8d7da',
-                        border: `1px solid ${
-                            message.includes('✅') ? '#c3e6cb' : '#f5c6cb'
-                        }`,
-                        borderRadius: '4px',
-                        color: message.includes('✅') ? '#155724' : '#721c24',
-                    }}
+                    className={`message ${
+                        message.includes('✅') ? 'success' : 'error'
+                    }`}
                 >
                     {message}
                 </div>

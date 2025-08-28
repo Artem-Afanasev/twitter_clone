@@ -12,9 +12,54 @@ export interface User {
 }
 
 // Создаем экземпляр axios с базовой конфигурацией
-const api = axios.create({
+export const api = axios.create({
     baseURL: API_URL,
 });
+
+export interface Tweet {
+    id: number;
+    content: string;
+    userId: number;
+    createdAt: string;
+    updatedAt: string;
+    user?: User;
+}
+
+export interface CreateTweetResponse {
+    message: string;
+    tweet: Tweet;
+}
+
+// Добавим в объект api методы для работы с твитами
+export const tweetAPI = {
+    createTweet: async (content: string): Promise<CreateTweetResponse> => {
+        const response = await api.post<CreateTweetResponse>('/posts', {
+            content,
+        });
+        return response.data;
+    },
+
+    // Получение постов ТЕКУЩЕГО пользователя
+    getMyTweets: async (): Promise<Tweet[]> => {
+        const response = await api.get<Tweet[]>('/posts/my-posts');
+        return response.data;
+    },
+
+    deleteTweet: async (id: number): Promise<void> => {
+        await api.delete(`/posts/${id}`);
+    },
+
+    getUserTweets: async (userId: number): Promise<Tweet[]> => {
+        const response = await api.get<Tweet[]>(`/tweets/user/${userId}`);
+        return response.data;
+    },
+
+    // Метод для получения всех твитов (если нужно)
+    getAllTweets: async (): Promise<Tweet[]> => {
+        const response = await api.get<Tweet[]>('/home');
+        return response.data;
+    },
+};
 
 // Добавляем интерцептор для автоматической подстановки токена
 api.interceptors.request.use((config) => {

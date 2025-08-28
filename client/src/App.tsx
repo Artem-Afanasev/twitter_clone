@@ -1,4 +1,4 @@
-// App.tsx - добавить Navigation
+import Home from './pages/Home';
 import React, { useState, useEffect } from 'react';
 import {
     BrowserRouter as Router,
@@ -70,13 +70,23 @@ const App: React.FC = () => {
                     <Route
                         path="*"
                         element={
-                            <div style={{ padding: '20px' }}>
+                            <div
+                                style={{ padding: '20px', paddingTop: '60px' }}
+                            >
                                 <h2>404 - Страница не найдена</h2>
                                 <p>
                                     Перейти на{' '}
-                                    <a href="/login">страницу входа</a>
+                                    <a href="/home">домашнюю страницу</a>
                                 </p>
                             </div>
+                        }
+                    />
+                    <Route
+                        path="/home"
+                        element={
+                            <ProtectedRoute>
+                                <Home />
+                            </ProtectedRoute>
                         }
                     />
                 </Routes>
