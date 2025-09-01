@@ -5,12 +5,18 @@ import CreatePost from '../components/CreatePost';
 import UserPosts from '../components/UserPosts';
 import '../styles/Profile.css';
 
+// Создаем расширенный интерфейс с avatar
+interface UserWithAvatar extends User {
+    avatar?: string;
+}
+
 const Profile: React.FC = () => {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserWithAvatar | null>(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         email: '',
+        avatar: '',
     });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
@@ -23,10 +29,12 @@ const Profile: React.FC = () => {
         try {
             setLoading(true);
             const response = await profileAPI.getProfile();
-            setUser(response.user);
+            const userData = response.user as UserWithAvatar;
+            setUser(userData);
             setFormData({
-                username: response.user.username,
-                email: response.user.email,
+                username: userData.username,
+                email: userData.email,
+                avatar: userData.avatar || '',
             });
         } catch (error: any) {
             setMessage(
@@ -42,9 +50,11 @@ const Profile: React.FC = () => {
         try {
             const response = await profileAPI.updateProfile(
                 formData.username,
-                formData.email
+                formData.email,
+                formData.avatar || undefined // Отправляем undefined если пустая строка
             );
-            setUser(response.user);
+            const updatedUser = response.user as UserWithAvatar;
+            setUser(updatedUser);
             setEditMode(false);
             setMessage('✅ Профиль успешно обновлен!');
 
@@ -52,8 +62,9 @@ const Profile: React.FC = () => {
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
-                userData.username = response.user.username;
-                userData.email = response.user.email;
+                userData.username = updatedUser.username;
+                userData.email = updatedUser.email;
+                userData.avatar = updatedUser.avatar;
                 localStorage.setItem('user', JSON.stringify(userData));
             }
         } catch (error: any) {
@@ -97,8 +108,24 @@ const Profile: React.FC = () => {
                 {/* Левая колонка - информация о пользователе */}
                 <div className="profile-sidebar">
                     <div className="user-card">
+                        {/* Заменяем букву на аватар */}
                         <div className="user-avatar">
-                            {user?.username?.charAt(0).toUpperCase() || 'U'}
+                            {user?.avatar ? (
+                                <img
+                                    src={user.avatar}
+                                    alt={user.username}
+                                    className="avatar-image"
+                                    onError={(e) => {
+                                        // Если изображение не загружается, показываем букву
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            ) : (
+                                <span className="avatar-fallback">
+                                    {user?.username?.charAt(0).toUpperCase() ||
+                                        'U'}
+                                </span>
+                            )}
                         </div>
 
                         <h2 className="username">@{user?.username}</h2>
@@ -170,6 +197,25 @@ const Profile: React.FC = () => {
                                     />
                                 </div>
 
+                                <div className="form-group">
+                                    <label>URL аватара:</label>
+                                    <input
+                                        type="url"
+                                        name="avatar"
+                                        value={formData.avatar}
+                                        onChange={handleChange}
+                                        placeholder="https://example.com/avatar.jpg"
+                                    />
+                                    <small
+                                        style={{
+                                            color: '#657786',
+                                            fontSize: '12px',
+                                        }}
+                                    >
+                                        Оставьте пустым для аватара по умолчанию
+                                    </small>
+                                </div>
+
                                 <div className="form-buttons">
                                     <button type="submit" className="save-btn">
                                         💾 Сохранить
@@ -181,6 +227,7 @@ const Profile: React.FC = () => {
                                             setFormData({
                                                 username: user?.username || '',
                                                 email: user?.email || '',
+                                                avatar: user?.avatar || '',
                                             });
                                         }}
                                         className="cancel-btn"

@@ -63,13 +63,12 @@ const Navigation: React.FC = () => {
                         gap: '1.5rem', // Уменьшили gap
                     }}
                 >
-                    {/* Имя пользователя (кликабельное для перехода в профиль) */}
                     {user.username && (
                         <span
                             onClick={() => navigate('/profile')}
                             style={{
                                 cursor: 'pointer',
-                                padding: '0.4rem 0.8rem', // Уменьшили padding
+                                padding: '0.4rem 0.8rem',
                                 borderRadius: '20px',
                                 backgroundColor:
                                     location.pathname === '/profile'
@@ -77,6 +76,9 @@ const Navigation: React.FC = () => {
                                         : 'transparent',
                                 transition: 'background-color 0.2s',
                                 fontSize: '0.9rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor =
@@ -89,7 +91,25 @@ const Navigation: React.FC = () => {
                                         : 'transparent';
                             }}
                         >
-                            👤 {user.username}
+                            {user.avatar ? (
+                                <img
+                                    src={user.avatar}
+                                    alt={user.username}
+                                    style={{
+                                        width: '24px',
+                                        height: '24px',
+                                        borderRadius: '50%',
+                                        objectFit: 'cover',
+                                    }}
+                                    onError={(e) => {
+                                        // Fallback к эмодзи если изображение не загружается
+                                        e.currentTarget.style.display = 'none';
+                                    }}
+                                />
+                            ) : (
+                                <span>👤</span>
+                            )}
+                            {user.username}
                         </span>
                     )}
 

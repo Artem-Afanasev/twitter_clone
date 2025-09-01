@@ -9,6 +9,7 @@ export interface User {
     email: string;
     createdAt?: string;
     updatedAt?: string;
+    avatar?: string;
 }
 
 // Создаем экземпляр axios с базовой конфигурацией
@@ -115,11 +116,13 @@ export const profileAPI = {
 
     updateProfile: async (
         username: string,
-        email: string
+        email: string,
+        avatar?: string // Добавляем опциональный параметр
     ): Promise<ProfileResponse> => {
         const response = await api.put<ProfileResponse>('/profile', {
             username,
             email,
+            avatar, // Отправляем аватар
         });
         return response.data;
     },

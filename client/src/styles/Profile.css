@@ -3,6 +3,7 @@
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    padding-top: 50px;
 }
 
 .profile-layout {
@@ -12,9 +13,22 @@
     align-items: start;
 }
 
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+}
+
 .profile-sidebar {
     position: sticky;
-    top: 20px;
+    top: 70px;
 }
 
 .user-card {
@@ -34,9 +48,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    font-weight: bold;
     margin: 0 auto 15px;
+    overflow: hidden; /* Важно для обрезки изображений */
 }
 
 .username {

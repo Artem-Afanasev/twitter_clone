@@ -5,7 +5,7 @@ export const getProfile = async (req, res) => {
         const userId = req.userId; // Предполагается, что userId добавляется в req через middleware аутентификации
 
         const user = await User.findByPk(userId, {
-            attributes: ['id', 'username', 'email', 'createdAt'], // Исключаем пароль и другие чувствительные данные
+            attributes: ['id', 'username', 'email', 'createdAt', 'avatar'], // Исключаем пароль и другие чувствительные данные
         });
 
         if (!user) {
@@ -18,6 +18,7 @@ export const getProfile = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
+                avatar: user.avatar,
                 createdAt: user.createdAt,
             },
         });

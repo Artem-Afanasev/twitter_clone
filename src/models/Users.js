@@ -36,6 +36,9 @@ const User = sequelize.define(
         avatar: {
             type: DataTypes.STRING,
             defaultValue: '',
+            validate: {
+                isUrl: true, // Добавляем валидацию URL
+            },
         },
     },
     {
@@ -45,6 +48,12 @@ const User = sequelize.define(
             beforeCreate: async (user) => {
                 if (user.password) {
                     user.password = await bcrypt.hash(user.password, 10);
+                }
+                // Устанавливаем аватар по умолчанию если не указан
+                if (!user.avatar) {
+                    user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        user.username
+                    )}&background=1da1f2&color=fff&size=200`;
                 }
             },
             beforeUpdate: async (user) => {
@@ -56,7 +65,6 @@ const User = sequelize.define(
     }
 );
 
-// Метод для проверки пароля
 User.prototype.validatePassword = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
