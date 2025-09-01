@@ -103,47 +103,48 @@ const Profile: React.FC = () => {
     }
 
     return (
-        <div className="profile-container">
-            <div className="profile-layout">
+        <div className='profile-container'>
+            <div className='profile-layout'>
                 {/* Левая колонка - информация о пользователе */}
-                <div className="profile-sidebar">
-                    <div className="user-card">
+                <div className='profile-sidebar'>
+                    <div className='user-card'>
                         {/* Заменяем букву на аватар */}
-                        <div className="user-avatar">
+                        <div className='user-avatar'>
                             {user?.avatar ? (
                                 <img
                                     src={user.avatar}
                                     alt={user.username}
-                                    className="avatar-image"
+                                    className='avatar-image'
                                     onError={(e) => {
-                                        // Если изображение не загружается, показываем букву
+                                        // Если изображение не загружается, показываем fallback
                                         e.currentTarget.style.display = 'none';
                                     }}
                                 />
-                            ) : (
-                                <span className="avatar-fallback">
+                            ) : null}
+                            {(!user?.avatar || user.avatar === '') && (
+                                <span className='avatar-fallback'>
                                     {user?.username?.charAt(0).toUpperCase() ||
                                         'U'}
                                 </span>
                             )}
                         </div>
 
-                        <h2 className="username">@{user?.username}</h2>
+                        <h2 className='username'>@{user?.username}</h2>
 
-                        <div className="user-info">
-                            <div className="info-item">
-                                <span className="label">📧 Email:</span>
-                                <span className="value">{user?.email}</span>
+                        <div className='user-info'>
+                            <div className='info-item'>
+                                <span className='label'>📧 Email:</span>
+                                <span className='value'>{user?.email}</span>
                             </div>
 
-                            <div className="info-item">
-                                <span className="label">🆔 ID:</span>
-                                <span className="value">#{user?.id}</span>
+                            <div className='info-item'>
+                                <span className='label'>🆔 ID:</span>
+                                <span className='value'>#{user?.id}</span>
                             </div>
 
-                            <div className="info-item">
-                                <span className="label">📅 Регистрация:</span>
-                                <span className="value">
+                            <div className='info-item'>
+                                <span className='label'>📅 Регистрация:</span>
+                                <span className='value'>
                                     {user?.createdAt
                                         ? new Date(
                                               user.createdAt
@@ -153,17 +154,17 @@ const Profile: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="profile-actions">
+                        <div className='profile-actions'>
                             <button
                                 onClick={() => setEditMode(true)}
-                                className="edit-btn"
+                                className='edit-btn'
                             >
                                 ✏️ Редактировать
                             </button>
 
                             <button
                                 onClick={handleLogout}
-                                className="logout-btn"
+                                className='logout-btn'
                             >
                                 🚪 Выйти
                             </button>
@@ -172,39 +173,39 @@ const Profile: React.FC = () => {
 
                     {/* Форма редактирования */}
                     {editMode && (
-                        <div className="edit-form">
+                        <div className='edit-form'>
                             <h3>✏️ Редактирование профиля</h3>
                             <form onSubmit={handleSubmit}>
-                                <div className="form-group">
+                                <div className='form-group'>
                                     <label>Имя пользователя:</label>
                                     <input
-                                        type="text"
-                                        name="username"
+                                        type='text'
+                                        name='username'
                                         value={formData.username}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
 
-                                <div className="form-group">
+                                <div className='form-group'>
                                     <label>Email:</label>
                                     <input
-                                        type="email"
-                                        name="email"
+                                        type='email'
+                                        name='email'
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
 
-                                <div className="form-group">
+                                <div className='form-group'>
                                     <label>URL аватара:</label>
                                     <input
-                                        type="url"
-                                        name="avatar"
+                                        type='url'
+                                        name='avatar'
                                         value={formData.avatar}
                                         onChange={handleChange}
-                                        placeholder="https://example.com/avatar.jpg"
+                                        placeholder='https://example.com/avatar.jpg'
                                     />
                                     <small
                                         style={{
@@ -216,12 +217,12 @@ const Profile: React.FC = () => {
                                     </small>
                                 </div>
 
-                                <div className="form-buttons">
-                                    <button type="submit" className="save-btn">
+                                <div className='form-buttons'>
+                                    <button type='submit' className='save-btn'>
                                         💾 Сохранить
                                     </button>
                                     <button
-                                        type="button"
+                                        type='button'
                                         onClick={() => {
                                             setEditMode(false);
                                             setFormData({
@@ -230,7 +231,7 @@ const Profile: React.FC = () => {
                                                 avatar: user?.avatar || '',
                                             });
                                         }}
-                                        className="cancel-btn"
+                                        className='cancel-btn'
                                     >
                                         ❌ Отмена
                                     </button>
@@ -241,7 +242,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Правая колонка - посты */}
-                <div className="profile-content">
+                <div className='profile-content'>
                     {/* Создание нового поста */}
                     <CreatePost />
 

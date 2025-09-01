@@ -1,6 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import mainRoute from './routes/index.js';
+import {
+    fileUploadMiddleware,
+    staticFilesMiddleware,
+} from './middleware/uploadMiddleware.js';
 
 const app = express();
 
@@ -11,6 +15,10 @@ app.use(
     })
 );
 app.use(express.json());
+
+app.use(fileUploadMiddleware);
+
+app.use('/uploads', staticFilesMiddleware);
 
 app.use(mainRoute);
 

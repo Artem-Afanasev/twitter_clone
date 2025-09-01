@@ -34,11 +34,8 @@ const User = sequelize.define(
             },
         },
         avatar: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(500), // Для хранения пути к файлу
             defaultValue: '',
-            validate: {
-                isUrl: true, // Добавляем валидацию URL
-            },
         },
     },
     {
@@ -49,11 +46,11 @@ const User = sequelize.define(
                 if (user.password) {
                     user.password = await bcrypt.hash(user.password, 10);
                 }
-                // Устанавливаем аватар по умолчанию если не указан
+                // Автоматически генерируем аватар если не указан
                 if (!user.avatar) {
-                    user.avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                        user.username
-                    )}&background=1da1f2&color=fff&size=200`;
+                    user.avatar = `/uploads/avatars/default/${user.username
+                        .charAt(0)
+                        .toUpperCase()}.png`;
                 }
             },
             beforeUpdate: async (user) => {
