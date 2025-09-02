@@ -62,12 +62,17 @@ export const tweetAPI = {
     },
 };
 
-// Добавляем интерцептор для автоматической подстановки токена
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Для FormData не устанавливаем Content-Type - браузер сделает это сам
+    if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+    }
+
     return config;
 });
 
@@ -117,12 +122,20 @@ export const profileAPI = {
     updateProfile: async (
         username: string,
         email: string,
-        avatar?: string // Добавляем опциональный параметр
+        avatarFile?: File // Меняем на File вместо string
     ): Promise<ProfileResponse> => {
-        const response = await api.put<ProfileResponse>('/profile', {
-            username,
-            email,
-            avatar, // Отправляем аватар
+        const formData = new FormData();
+        formData.append('username', username);
+        formData.append('email', email);
+
+        if (avatarFile) {
+            formData.append('avatar', avatarFile);
+        }
+
+        const response = await api.put<ProfileResponse>('/profile', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
         return response.data;
     },

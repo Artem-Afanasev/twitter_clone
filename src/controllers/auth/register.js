@@ -11,11 +11,9 @@ export const register = async (req, res) => {
         const { username, email, password } = req.body;
         let avatarPath = '';
 
-        // Обработка загруженного аватара
         if (req.files && req.files.avatar) {
             const avatar = req.files.avatar;
 
-            // Проверяем тип файла
             const allowedTypes = [
                 'image/jpeg',
                 'image/png',
@@ -28,18 +26,11 @@ export const register = async (req, res) => {
                     .json({ error: 'Недопустимый тип файла' });
             }
 
-            // Создаем папку для аватаров если не существует
-            const uploadDir = path.join(__dirname, '../../../uploads/avatars');
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
-            // Генерируем уникальное имя файла
+            const uploadDir = path.join(__dirname, '../uploads/avatars');
             const fileExtension = path.extname(avatar.name);
             const fileName = `user_${Date.now()}${fileExtension}`;
             const filePath = path.join(uploadDir, fileName);
 
-            // Сохраняем файл
             await avatar.mv(filePath);
             avatarPath = `/uploads/avatars/${fileName}`;
         }
@@ -48,7 +39,7 @@ export const register = async (req, res) => {
             username,
             email,
             password,
-            avatar: avatarPath, // Сохраняем путь к аватару
+            avatar: avatarPath,
         });
 
         res.status(201).json({
@@ -57,7 +48,7 @@ export const register = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                avatar: user.avatar, // Возвращаем путь к аватару
+                avatar: user.avatar,
             },
         });
     } catch (error) {

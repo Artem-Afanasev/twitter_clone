@@ -21,6 +21,9 @@ const Profile: React.FC = () => {
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -28,7 +31,13 @@ const Profile: React.FC = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
+            console.log('🔄 Fetching profile...');
             const response = await profileAPI.getProfile();
+            console.log('✅ API Response:', response);
+            console.log('📦 Raw user data:', response.user);
+            console.log('🖼️ Avatar from API:', response.user.avatar);
+            console.log('🔍 Avatar type:', typeof response.user.avatar);
+
             const userData = response.user as UserWithAvatar;
             setUser(userData);
             setFormData({
@@ -37,11 +46,26 @@ const Profile: React.FC = () => {
                 avatar: userData.avatar || '',
             });
         } catch (error: any) {
+            console.error('❌ Profile fetch error:', error);
             setMessage(
                 `❌ Ошибка: ${error.response?.data?.error || error.message}`
             );
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setAvatarFile(file);
+
+            // Создаем preview для предпросмотра
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setAvatarPreview(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -51,14 +75,16 @@ const Profile: React.FC = () => {
             const response = await profileAPI.updateProfile(
                 formData.username,
                 formData.email,
-                formData.avatar || undefined // Отправляем undefined если пустая строка
+                avatarFile || undefined
             );
             const updatedUser = response.user as UserWithAvatar;
+
+            // Обновляем состояние
             setUser(updatedUser);
             setEditMode(false);
             setMessage('✅ Профиль успешно обновлен!');
 
-            // Обновляем данные в localStorage
+            // Обновляем localStorage
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
@@ -67,6 +93,13 @@ const Profile: React.FC = () => {
                 userData.avatar = updatedUser.avatar;
                 localStorage.setItem('user', JSON.stringify(userData));
             }
+
+            // Сбрасываем preview и файл
+            setAvatarFile(null);
+            setAvatarPreview(null);
+
+            // Обновляем данные профиля без перезагрузки
+            fetchProfile();
         } catch (error: any) {
             setMessage(
                 `❌ Ошибка: ${error.response?.data?.error || error.message}`
@@ -103,48 +136,56 @@ const Profile: React.FC = () => {
     }
 
     return (
-        <div className='profile-container'>
-            <div className='profile-layout'>
+        <div className="profile-container">
+            <div className="profile-layout">
                 {/* Левая колонка - информация о пользователе */}
-                <div className='profile-sidebar'>
-                    <div className='user-card'>
+                <div className="profile-sidebar">
+                    <div className="user-card">
                         {/* Заменяем букву на аватар */}
-                        <div className='user-avatar'>
+                        <div className="user-avatar">
                             {user?.avatar ? (
                                 <img
                                     src={user.avatar}
                                     alt={user.username}
-                                    className='avatar-image'
+                                    className="avatar-image"
                                     onError={(e) => {
-                                        // Если изображение не загружается, показываем fallback
+                                        console.error(
+                                            '❌ Image failed to load:',
+                                            user.avatar
+                                        );
                                         e.currentTarget.style.display = 'none';
                                     }}
+                                    onLoad={() =>
+                                        console.log(
+                                            '✅ Image loaded:',
+                                            user.avatar
+                                        )
+                                    }
                                 />
-                            ) : null}
-                            {(!user?.avatar || user.avatar === '') && (
-                                <span className='avatar-fallback'>
+                            ) : (
+                                <span className="avatar-fallback">
                                     {user?.username?.charAt(0).toUpperCase() ||
                                         'U'}
                                 </span>
                             )}
                         </div>
 
-                        <h2 className='username'>@{user?.username}</h2>
+                        <h2 className="username">@{user?.username}</h2>
 
-                        <div className='user-info'>
-                            <div className='info-item'>
-                                <span className='label'>📧 Email:</span>
-                                <span className='value'>{user?.email}</span>
+                        <div className="user-info">
+                            <div className="info-item">
+                                <span className="label">📧 Email:</span>
+                                <span className="value">{user?.email}</span>
                             </div>
 
-                            <div className='info-item'>
-                                <span className='label'>🆔 ID:</span>
-                                <span className='value'>#{user?.id}</span>
+                            <div className="info-item">
+                                <span className="label">🆔 ID:</span>
+                                <span className="value">#{user?.id}</span>
                             </div>
 
-                            <div className='info-item'>
-                                <span className='label'>📅 Регистрация:</span>
-                                <span className='value'>
+                            <div className="info-item">
+                                <span className="label">📅 Регистрация:</span>
+                                <span className="value">
                                     {user?.createdAt
                                         ? new Date(
                                               user.createdAt
@@ -154,17 +195,17 @@ const Profile: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className='profile-actions'>
+                        <div className="profile-actions">
                             <button
                                 onClick={() => setEditMode(true)}
-                                className='edit-btn'
+                                className="edit-btn"
                             >
                                 ✏️ Редактировать
                             </button>
 
                             <button
                                 onClick={handleLogout}
-                                className='logout-btn'
+                                className="logout-btn"
                             >
                                 🚪 Выйти
                             </button>
@@ -173,39 +214,38 @@ const Profile: React.FC = () => {
 
                     {/* Форма редактирования */}
                     {editMode && (
-                        <div className='edit-form'>
+                        <div className="edit-form">
                             <h3>✏️ Редактирование профиля</h3>
                             <form onSubmit={handleSubmit}>
-                                <div className='form-group'>
+                                <div className="form-group">
                                     <label>Имя пользователя:</label>
                                     <input
-                                        type='text'
-                                        name='username'
+                                        type="text"
+                                        name="username"
                                         value={formData.username}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
 
-                                <div className='form-group'>
+                                <div className="form-group">
                                     <label>Email:</label>
                                     <input
-                                        type='email'
-                                        name='email'
+                                        type="email"
+                                        name="email"
                                         value={formData.email}
                                         onChange={handleChange}
                                         required
                                     />
                                 </div>
 
-                                <div className='form-group'>
-                                    <label>URL аватара:</label>
+                                <div className="form-group">
+                                    <label>Аватар:</label>
                                     <input
-                                        type='url'
-                                        name='avatar'
-                                        value={formData.avatar}
-                                        onChange={handleChange}
-                                        placeholder='https://example.com/avatar.jpg'
+                                        type="file"
+                                        name="avatar"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        onChange={handleFileChange}
                                     />
                                     <small
                                         style={{
@@ -213,16 +253,31 @@ const Profile: React.FC = () => {
                                             fontSize: '12px',
                                         }}
                                     >
-                                        Оставьте пустым для аватара по умолчанию
+                                        Выберите файл с компьютера
                                     </small>
+
+                                    {avatarPreview && (
+                                        <div style={{ marginTop: '10px' }}>
+                                            <img
+                                                src={avatarPreview}
+                                                alt="Preview"
+                                                style={{
+                                                    width: '60px',
+                                                    height: '60px',
+                                                    borderRadius: '50%',
+                                                    objectFit: 'cover',
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
-                                <div className='form-buttons'>
-                                    <button type='submit' className='save-btn'>
+                                <div className="form-buttons">
+                                    <button type="submit" className="save-btn">
                                         💾 Сохранить
                                     </button>
                                     <button
-                                        type='button'
+                                        type="button"
                                         onClick={() => {
                                             setEditMode(false);
                                             setFormData({
@@ -231,7 +286,7 @@ const Profile: React.FC = () => {
                                                 avatar: user?.avatar || '',
                                             });
                                         }}
-                                        className='cancel-btn'
+                                        className="cancel-btn"
                                     >
                                         ❌ Отмена
                                     </button>
@@ -242,7 +297,7 @@ const Profile: React.FC = () => {
                 </div>
 
                 {/* Правая колонка - посты */}
-                <div className='profile-content'>
+                <div className="profile-content">
                     {/* Создание нового поста */}
                     <CreatePost />
 

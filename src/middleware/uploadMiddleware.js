@@ -8,18 +8,24 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// АБСОЛЮТНЫЙ путь к папке uploads
+const UPLOADS_DIR = path.join(__dirname, '../uploads');
+
 // Создаем папки для загрузок
 const uploadDirs = [
-    path.join(__dirname, '../uploads'),
-    path.join(__dirname, '../uploads/avatars'),
-    path.join(__dirname, '../uploads/avatars/default'),
+    UPLOADS_DIR,
+    path.join(UPLOADS_DIR, 'avatars'),
+    path.join(UPLOADS_DIR, 'avatars/default'),
 ];
 
 uploadDirs.forEach((dir) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
+        console.log(`✅ Created directory: ${dir}`);
     }
 });
+
+console.log('📁 Uploads directory:', UPLOADS_DIR);
 
 // Middleware для загрузки файлов
 export const fileUploadMiddleware = fileUpload({
@@ -31,9 +37,7 @@ export const fileUploadMiddleware = fileUpload({
     responseOnLimit: 'File size limit has been reached',
 });
 
-// Middleware для статических файлов
-export const staticFilesMiddleware = express.static(
-    path.join(__dirname, '../uploads')
-);
+// Middleware для статических файлов - исправляем путь
+export const staticFilesMiddleware = express.static(UPLOADS_DIR);
 
 export default { fileUploadMiddleware, staticFilesMiddleware };
