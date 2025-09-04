@@ -15,6 +15,7 @@ const HomeFeed: React.FC = () => {
 
             const allPosts = await tweetAPI.getAllTweets();
             console.log('✅ Получено постов:', allPosts.length);
+            console.log('📦 Данные постов:', allPosts);
             setPosts(allPosts);
         } catch (err: any) {
             console.error('❌ Ошибка загрузки ленты:', err);
@@ -27,6 +28,50 @@ const HomeFeed: React.FC = () => {
     useEffect(() => {
         fetchAllPosts();
     }, []);
+
+    // Функция для отображения аватара
+    const renderAvatar = (user: any) => {
+        if (user?.avatar) {
+            return (
+                <img
+                    src={user.avatar}
+                    alt={user.username}
+                    style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid #1da1f2',
+                    }}
+                    onError={(e) => {
+                        // Если изображение не загружается, показываем fallback
+                        e.currentTarget.style.display = 'none';
+                    }}
+                />
+            );
+        }
+
+        // Fallback аватар
+        return (
+            <div
+                style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #1da1f2, #657786)',
+                    color: 'white',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '18px',
+                    flexShrink: 0,
+                }}
+            >
+                {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+        );
+    };
 
     if (loading) {
         return (
@@ -68,7 +113,7 @@ const HomeFeed: React.FC = () => {
                     textAlign: 'center',
                 }}
             >
-                🏠 Домашняя лента
+                Домашняя лента
             </h2>
 
             {posts.length === 0 ? (
@@ -129,26 +174,8 @@ const HomeFeed: React.FC = () => {
                                     gap: '12px',
                                 }}
                             >
-                                <div
-                                    style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '50%',
-                                        background:
-                                            'linear-gradient(135deg, #1da1f2, #657786)',
-                                        color: 'white',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontWeight: 'bold',
-                                        fontSize: '18px',
-                                        flexShrink: 0,
-                                    }}
-                                >
-                                    {post.User?.username
-                                        ?.charAt(0)
-                                        ?.toUpperCase() || 'U'}
-                                </div>
+                                {/* Аватар пользователя */}
+                                {renderAvatar(post.User)}
 
                                 <div>
                                     <div

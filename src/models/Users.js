@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from './index.js';
+import sequelize from '../database/sequelize.js';
 import bcrypt from 'bcryptjs';
 
 const User = sequelize.define(
@@ -34,7 +34,7 @@ const User = sequelize.define(
             },
         },
         avatar: {
-            type: DataTypes.STRING(500), // Для хранения пути к файлу
+            type: DataTypes.STRING(500),
             defaultValue: '',
         },
     },
@@ -45,12 +45,6 @@ const User = sequelize.define(
             beforeCreate: async (user) => {
                 if (user.password) {
                     user.password = await bcrypt.hash(user.password, 10);
-                }
-                // Автоматически генерируем аватар если не указан
-                if (!user.avatar) {
-                    user.avatar = `/uploads/avatars/default/${user.username
-                        .charAt(0)
-                        .toUpperCase()}.png`;
                 }
             },
             beforeUpdate: async (user) => {

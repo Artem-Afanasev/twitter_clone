@@ -6,6 +6,7 @@ const UserPosts: React.FC = () => {
     const [posts, setPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [expandedImage, setExpandedImage] = useState<string | null>(null);
 
     const fetchUserPosts = async () => {
         try {
@@ -115,16 +116,52 @@ const UserPosts: React.FC = () => {
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                             }}
                         >
+                            {/* Текст поста - вверху */}
                             <p
                                 style={{
                                     margin: '0 0 15px 0',
                                     fontSize: '16px',
                                     lineHeight: '1.4',
+                                    wordBreak: 'break-word',
                                 }}
                             >
                                 {post.content}
                             </p>
+                            <div>
+                                {/* Модальное окно для просмотра изображения */}
+                                {expandedImage && (
+                                    <div
+                                        style={{
+                                            position: 'fixed',
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            backgroundColor: 'rgba(0,0,0,0.9)',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            zIndex: 1000,
+                                            cursor: 'pointer',
+                                        }}
+                                        onClick={() => setExpandedImage(null)}
+                                    >
+                                        <img
+                                            src={expandedImage}
+                                            alt="Увеличенное изображение"
+                                            style={{
+                                                maxWidth: '90%',
+                                                maxHeight: '90%',
+                                                objectFit: 'contain',
+                                            }}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </div>
+                                )}
 
+                                {/* Остальной код без изменений */}
+                            </div>
+                            ;
                             <div
                                 style={{
                                     display: 'flex',

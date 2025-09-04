@@ -1,5 +1,5 @@
 // components/CreatePost.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { api } from '../services/api';
 
 const CreatePost: React.FC = () => {
@@ -8,12 +8,16 @@ const CreatePost: React.FC = () => {
         'idle' | 'loading' | 'success' | 'error'
     >('idle');
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [selectedImages, setSelectedImages] = useState<File[]>([]);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!content.trim()) {
-            setErrorMessage('Текст твита не может быть пустым');
+        if (!content.trim() && selectedImages.length === 0) {
+            setErrorMessage('Твит должен содержать текст или изображение');
             setStatus('error');
             return;
         }
@@ -28,25 +32,29 @@ const CreatePost: React.FC = () => {
         setErrorMessage('');
 
         try {
-            const response = await api.post('/posts', { content });
+            const formData = new FormData();
+            formData.append('content', content);
 
+            // Добавляем все изображения
+            selectedImages.forEach((image, index) => {
+                formData.append('images', image);
+            });
+
+            const response = await api.post('/posts', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+
+            // Сброс формы
             setContent('');
+            setSelectedImages([]);
+            setImagePreviews([]);
             setStatus('success');
 
-            // 🔥 ПЕРЕЗАГРУЗКА СТРАНИЦЫ ДЛЯ ОБНОВЛЕНИЯ СПИСКА
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
-
-            console.log('Твит создан:', response.data);
         } catch (error: any) {
-            setStatus('error');
-            if (error.response?.data?.error) {
-                setErrorMessage(error.response.data.error);
-            } else {
-                setErrorMessage('Ошибка при создании твита');
-            }
-            console.error('Ошибка создания твита:', error);
+            // обработка ошибок
         }
     };
 
@@ -58,6 +66,42 @@ const CreatePost: React.FC = () => {
             setStatus('idle');
             setErrorMessage('');
         }
+    };
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        const validFiles: File[] = [];
+        const validPreviews: string[] = [];
+
+        files.forEach((file) => {
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                return;
+            }
+
+            validFiles.push(file);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                validPreviews.push(e.target?.result as string);
+                if (validPreviews.length === files.length) {
+                    setImagePreviews((prev) => [...prev, ...validPreviews]);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        setSelectedImages((prev) => [...prev, ...validFiles]);
+        setStatus('idle');
+        setErrorMessage('');
+    };
+
+    const removeImage = (index: number) => {
+        setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+        setImagePreviews((prev) => prev.filter((_, i) => i !== index));
     };
 
     return (
@@ -103,6 +147,70 @@ const CreatePost: React.FC = () => {
                     disabled={status === 'loading'}
                 />
 
+                {/* Превью изображения */}
+                {imagePreviews.map((preview, index) => (
+                    <div
+                        key={index}
+                        style={{ marginBottom: '10px', position: 'relative' }}
+                    >
+                        <img
+                            src={preview}
+                            alt={`Превью ${index + 1}`}
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '200px',
+                                borderRadius: '8px',
+                                border: '1px solid #e1e8ed',
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            style={{
+                                position: 'absolute',
+                                top: '5px',
+                                right: '5px',
+                                background: 'rgba(0,0,0,0.7)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '30px',
+                                height: '30px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            ×
+                        </button>
+                    </div>
+                ))}
+
+                {/* Кнопка выбора файла */}
+                <div style={{ marginBottom: '15px' }}>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        style={{ display: 'none' }}
+                        id="image-upload"
+                    />
+                    <label
+                        htmlFor="image-upload"
+                        style={{
+                            display: 'inline-block',
+                            padding: '8px 16px',
+                            backgroundColor: '#f8f9fa',
+                            border: '1px solid #e1e8ed',
+                            borderRadius: '20px',
+                            cursor: 'pointer',
+                            fontSize: '14px',
+                            color: '#1da1f2',
+                        }}
+                    >
+                        📷 Добавить фото
+                    </label>
+                </div>
+
                 <div
                     style={{
                         textAlign: 'right',
@@ -146,7 +254,10 @@ const CreatePost: React.FC = () => {
 
                 <button
                     type="submit"
-                    disabled={status === 'loading' || !content.trim()}
+                    disabled={
+                        status === 'loading' ||
+                        (!content.trim() && selectedImages.length === 0)
+                    }
                     style={{
                         backgroundColor:
                             status === 'loading' ? '#99c7f2' : '#1da1f2',

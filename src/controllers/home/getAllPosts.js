@@ -1,28 +1,33 @@
-import Tweet from '../../models/Post.js';
-import User from '../../models/Users.js';
+import { User } from '../../models/index.js';
+import { Tweet } from '../../models/index.js';
 
 export const getAllPosts = async (req, res) => {
     try {
-        const userId = req.userId;
-
-        console.log('🔄 Получение всех постов для пользователя:', userId);
-
         const posts = await Tweet.findAll({
             include: [
                 {
                     model: User,
-                    attributes: ['id', 'username', 'email'],
+                    attributes: ['id', 'username', 'email', 'avatar'],
                 },
             ],
             order: [['createdAt', 'DESC']],
             limit: 100,
         });
 
-        console.log('✅ Найдено постов:', posts.length);
+        const postsWithAvatarUrls = posts.map((post) => {
+            const postData = post.toJSON();
+            if (
+                postData.User &&
+                postData.User.avatar &&
+                !postData.User.avatar.startsWith('http')
+            ) {
+                postData.User.avatar = `http://localhost:5000${postData.User.avatar}`;
+            }
+            return postData;
+        });
 
-        res.json(posts);
+        res.json(postsWithAvatarUrls);
     } catch (error) {
-        console.error('❌ Ошибка при получении постов:', error);
         res.status(500).json({ error: 'Ошибка при загрузке ленты' });
     }
 };

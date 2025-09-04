@@ -1,47 +1,132 @@
-import Tweet from '../../models/Post.js'; // Импорт модели твита
-import User from '../../models/Users.js'; // Импорт модели пользователя
+import { Tweet as Post, PostImage } from '../../models/index.js';
+import { User } from '../../models/index.js';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const makePostfunc = async (req, res) => {
     try {
-        const { content } = req.body; // Получаем текст твита из тела запроса
-        const userId = req.userId; // Получаем ID пользователя из middleware аутентификации
+        const { content } = req.body;
+        const userId = req.userId;
 
-        // Проверяем, что контент не пустой
         if (!content || content.trim().length === 0) {
             return res
                 .status(400)
                 .json({ error: 'Текст твита не может быть пустым' });
         }
 
-        // Проверяем длину твита (макс. 280 символов)
         if (content.length > 280) {
             return res
                 .status(400)
                 .json({ error: 'Твит не может превышать 280 символов' });
         }
 
-        // Создаем твит в базе данных
-        const tweet = await Tweet.create({
-            content: content.trim(), // Очищаем от пробелов по краям
-            userId: userId, // Связываем твит с пользователем
+        // Создаем твит
+        const tweet = await Post.create({
+            content: content.trim(),
+            userId: userId,
         });
 
-        // Находим пользователя, чтобы вернуть его данные в ответе
+        // Обработка множественных изображений
+        const imagePaths = [];
+
+        if (req.files) {
+            let images = [];
+
+            // express-fileupload по-разному обрабатывает один и несколько файлов
+            if (Array.isArray(req.files.images)) {
+                images = req.files.images;
+            } else if (req.files.images) {
+                images = [req.files.images];
+            }
+
+            const uploadDir = path.join(__dirname, '../../../uploads/posts');
+
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
+            for (let i = 0; i < images.length; i++) {
+                const image = images[i];
+
+                const allowedTypes = [
+                    'image/jpeg',
+                    'image/png',
+                    'image/gif',
+                    'image/webp',
+                ];
+                if (!allowedTypes.includes(image.mimetype)) {
+                    console.log(
+                        'Пропущен невалидный тип файла:',
+                        image.mimetype
+                    );
+                    continue;
+                }
+
+                if (image.size > 5 * 1024 * 1024) {
+                    console.log('Пропущен большой файл:', image.size);
+                    continue;
+                }
+
+                const fileExtension = path.extname(image.name);
+                const fileName = `post_${
+                    tweet.id
+                }_${Date.now()}_${i}${fileExtension}`;
+                const filePath = path.join(uploadDir, fileName);
+
+                // Сохраняем файл
+                await image.mv(filePath);
+                const imagePath = `/uploads/posts/${fileName}`;
+
+                // Сохраняем изображение в БД
+                await PostImage.create({
+                    imageUrl: imagePath,
+                    tweetId: tweet.id,
+                    order: i,
+                });
+
+                imagePaths.push(imagePath);
+            }
+        }
+        // Находим пользователя и изображения
         const user = await User.findByPk(userId, {
-            attributes: ['id', 'username', 'email'], // Не возвращаем пароль
+            attributes: ['id', 'username', 'email', 'avatar'],
         });
 
-        // Возвращаем успешный ответ с данными твита
+        const images = await PostImage.findAll({
+            where: { tweetId: tweet.id },
+            order: [['order', 'ASC']],
+        });
+
+        // Форматируем URL
+        let userAvatar = user.avatar;
+        if (userAvatar && !userAvatar.startsWith('http')) {
+            userAvatar = `http://localhost:5000${userAvatar}`;
+        }
+
+        const formattedImages = images.map((img) => {
+            let url = img.imageUrl;
+            if (url && !url.startsWith('http')) {
+                url = `http://localhost:5000${url}`;
+            }
+            return url;
+        });
+
         res.status(201).json({
             message: '✅ Твит успешно создан',
             tweet: {
                 id: tweet.id,
                 content: tweet.content,
+                images: formattedImages,
                 createdAt: tweet.createdAt,
                 user: {
                     id: user.id,
                     username: user.username,
                     email: user.email,
+                    avatar: userAvatar,
                 },
             },
         });

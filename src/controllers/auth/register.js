@@ -1,4 +1,4 @@
-import User from '../../models/Users.js';
+import { User } from '../../models/index.js';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

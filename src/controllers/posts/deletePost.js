@@ -1,5 +1,5 @@
 // controllers/posts/deletePost.js
-import Tweet from '../../models/Post.js';
+import { Tweet } from '../../models/index.js';
 
 export const deletePost = async (req, res) => {
     try {

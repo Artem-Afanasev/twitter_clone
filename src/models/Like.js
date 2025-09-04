@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from './index.js';
+import sequelize from '../database/sequelize.js';
 
 const Like = sequelize.define(
     'Like',
@@ -9,10 +9,24 @@ const Like = sequelize.define(
             primaryKey: true,
             autoIncrement: true,
         },
+        userId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        tweetId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
     },
     {
         tableName: 'likes',
         timestamps: true,
+        indexes: [
+            {
+                unique: true,
+                fields: ['userId', 'tweetId'],
+            },
+        ],
     }
 );
 

@@ -1,6 +1,5 @@
 import { DataTypes } from 'sequelize';
-import { sequelize } from './index.js';
-import User from './Users.js';
+import sequelize from '../database/sequelize.js';
 
 const Tweet = sequelize.define(
     'Tweet',
@@ -21,10 +20,10 @@ const Tweet = sequelize.define(
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: User,
-                key: 'id',
-            },
+        },
+        imageUrl: {
+            type: DataTypes.STRING(500),
+            allowNull: true,
         },
     },
     {
@@ -33,7 +32,32 @@ const Tweet = sequelize.define(
     }
 );
 
-Tweet.belongsTo(User, { foreignKey: 'userId' });
-User.hasMany(Tweet, { foreignKey: 'userId' });
+const PostImage = sequelize.define(
+    'PostImage',
+    {
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        imageUrl: {
+            type: DataTypes.STRING(500),
+            allowNull: false,
+        },
+        tweetId: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        order: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+        },
+    },
+    {
+        tableName: 'post_images',
+        timestamps: true,
+    }
+);
 
-export default Tweet;
+export { Tweet, PostImage };
