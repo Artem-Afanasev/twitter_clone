@@ -22,16 +22,29 @@ export const getMyPosts = async (req, res) => {
             ],
             order: [
                 ['createdAt', 'DESC'],
-                [{ model: PostImage, as: 'images' }, 'order', 'ASC'], // Исправьте эту строку
+                [{ model: PostImage, as: 'images' }, 'order', 'ASC'],
             ],
+        });
+
+        console.log('📊 Получены посты:', posts.length);
+        posts.forEach((post, index) => {
+            console.log(`📝 Post ${index + 1}:`, post.id);
+            console.log('   👤 User:', post.user?.username);
+            console.log('   🖼️ Images count:', post.images?.length);
+            if (post.images?.length > 0) {
+                console.log(
+                    '   🖼️ Image URLs:',
+                    post.images.map((img) => img.imageUrl)
+                );
+            }
         });
 
         const formattedPosts = posts.map((post) => {
             const postData = post.toJSON();
+            console.log('📦 Post data:', postData);
 
-            // Форматируем аватар
             if (
-                postData.user && // ИЗМЕНИТЕ С User НА user
+                postData.user &&
                 postData.user.avatar &&
                 !postData.user.avatar.startsWith('http')
             ) {

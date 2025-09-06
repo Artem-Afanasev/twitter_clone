@@ -14,8 +14,11 @@ const HomeFeed: React.FC = () => {
             console.log('🔄 Загрузка ленты...');
 
             const allPosts = await tweetAPI.getAllTweets();
-            console.log('✅ Получено постов:', allPosts.length);
-            console.log('📦 Данные постов:', allPosts);
+            if (allPosts.length > 0) {
+                console.log('📦 Структура первого поста:', allPosts[0]);
+                console.log('👤 Данные пользователя:', allPosts[0].user);
+                console.log('👤 Или User?:', allPosts[0].user);
+            }
             setPosts(allPosts);
         } catch (err: any) {
             console.error('❌ Ошибка загрузки ленты:', err);
@@ -29,8 +32,30 @@ const HomeFeed: React.FC = () => {
         fetchAllPosts();
     }, []);
 
-    // Функция для отображения аватара
     const renderAvatar = (user: any) => {
+        // Добавьте проверку
+        if (!user) {
+            return (
+                <div
+                    style={{
+                        width: '48px',
+                        height: '48px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #1da1f2, #657786)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 'bold',
+                        fontSize: '18px',
+                        flexShrink: 0,
+                    }}
+                >
+                    U
+                </div>
+            );
+        }
+
         if (user?.avatar) {
             return (
                 <img
@@ -44,7 +69,6 @@ const HomeFeed: React.FC = () => {
                         border: '2px solid #1da1f2',
                     }}
                     onError={(e) => {
-                        // Если изображение не загружается, показываем fallback
                         e.currentTarget.style.display = 'none';
                     }}
                 />
@@ -175,7 +199,7 @@ const HomeFeed: React.FC = () => {
                                 }}
                             >
                                 {/* Аватар пользователя */}
-                                {renderAvatar(post.User)}
+                                {renderAvatar(post.user || post.User)}
 
                                 <div>
                                     <div
@@ -185,7 +209,8 @@ const HomeFeed: React.FC = () => {
                                             fontSize: '16px',
                                         }}
                                     >
-                                        {post.User?.username ||
+                                        {post.user?.username ||
+                                            post.User?.username ||
                                             'Неизвестный автор'}
                                     </div>
                                     <div
@@ -194,7 +219,10 @@ const HomeFeed: React.FC = () => {
                                             fontSize: '14px',
                                         }}
                                     >
-                                        @{post.User?.username || 'unknown'}
+                                        @
+                                        {post.user?.username ||
+                                            post.User?.username ||
+                                            'unknown'}
                                     </div>
                                 </div>
                             </div>

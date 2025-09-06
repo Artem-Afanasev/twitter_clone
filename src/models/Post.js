@@ -21,10 +21,6 @@ const Tweet = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        imageUrl: {
-            type: DataTypes.STRING(500),
-            allowNull: true,
-        },
     },
     {
         tableName: 'tweets',

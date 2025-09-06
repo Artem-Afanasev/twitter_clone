@@ -5,22 +5,7 @@ import User from './Users.js';
 import { Tweet, PostImage } from './Post.js';
 import Like from './Like.js';
 
-// Собираем все модели
-const models = {
-    User,
-    Tweet,
-    PostImage,
-    Like,
-};
-
 // Устанавливаем ассоциации
-Object.values(models).forEach((model) => {
-    if (model.associate) {
-        model.associate(models);
-    }
-});
-
-// Добавляем ассоциации вручную
 User.hasMany(Tweet, { foreignKey: 'userId', as: 'tweets' });
 Tweet.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
@@ -50,4 +35,3 @@ User.belongsToMany(User, {
 console.log('✅ Все модели и ассоциации инициализированы');
 
 export { sequelize, User, Tweet, PostImage, Like };
-export default models;

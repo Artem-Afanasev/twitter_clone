@@ -1,4 +1,3 @@
-// components/UserPosts.tsx
 import React, { useState, useEffect } from 'react';
 import { tweetAPI } from '../services/api';
 
@@ -31,7 +30,6 @@ const UserPosts: React.FC = () => {
 
         try {
             await tweetAPI.deleteTweet(postId);
-            // Обновляем список после удаления
             setPosts(posts.filter((post) => post.id !== postId));
         } catch (error) {
             console.error('Ошибка удаления твита:', error);
@@ -76,7 +74,7 @@ const UserPosts: React.FC = () => {
                     fontSize: '24px',
                 }}
             >
-                📝 Мои твиты ({posts.length})
+                Мои посты ({posts.length})
             </h3>
 
             {posts.length === 0 ? (
@@ -89,9 +87,7 @@ const UserPosts: React.FC = () => {
                         borderRadius: '12px',
                     }}
                 >
-                    <p style={{ fontSize: '18px', marginBottom: '10px' }}>
-                        🐦‍⬛
-                    </p>
+                    <p style={{ fontSize: '18px', marginBottom: '10px' }}></p>
                     <p>У вас еще нет твитов</p>
                     <p style={{ fontSize: '14px', marginTop: '5px' }}>
                         Напишите что-нибудь первым!
@@ -116,19 +112,73 @@ const UserPosts: React.FC = () => {
                                 boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
                             }}
                         >
-                            {/* Текст поста - вверху */}
                             <p
                                 style={{
                                     margin: '0 0 15px 0',
                                     fontSize: '16px',
                                     lineHeight: '1.4',
                                     wordBreak: 'break-word',
+                                    textAlign: 'left',
                                 }}
                             >
                                 {post.content}
                             </p>
+                            {post.images && post.images.length > 0 && (
+                                <div
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns:
+                                            post.images.length === 1
+                                                ? '1fr'
+                                                : post.images.length === 2
+                                                ? 'repeat(2, 1fr)'
+                                                : 'repeat(3, 1fr)',
+                                        gap: '8px',
+                                        marginBottom: '15px',
+                                    }}
+                                >
+                                    {post.images.map(
+                                        (image: string, index: number) => (
+                                            <div
+                                                key={index}
+                                                style={{
+                                                    position: 'relative',
+                                                    cursor: 'pointer',
+                                                    borderRadius: '8px',
+                                                    overflow: 'hidden',
+                                                    aspectRatio: '1',
+                                                }}
+                                                onClick={() =>
+                                                    setExpandedImage(image)
+                                                }
+                                            >
+                                                <img
+                                                    src={image}
+                                                    alt={`Изображение ${
+                                                        index + 1
+                                                    }`}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        objectFit: 'cover',
+                                                        transition:
+                                                            'transform 0.2s',
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.transform =
+                                                            'scale(1.02)';
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.transform =
+                                                            'scale(1)';
+                                                    }}
+                                                />
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            )}
                             <div>
-                                {/* Модальное окно для просмотра изображения */}
                                 {expandedImage && (
                                     <div
                                         style={{
@@ -158,10 +208,8 @@ const UserPosts: React.FC = () => {
                                         />
                                     </div>
                                 )}
-
-                                {/* Остальной код без изменений */}
                             </div>
-                            ;
+
                             <div
                                 style={{
                                     display: 'flex',
@@ -172,7 +220,7 @@ const UserPosts: React.FC = () => {
                                 }}
                             >
                                 <span>
-                                    📅{' '}
+                                    {' '}
                                     {new Date(post.createdAt).toLocaleString(
                                         'ru-RU'
                                     )}
