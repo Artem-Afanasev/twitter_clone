@@ -1,11 +1,9 @@
 import sequelize from '../database/sequelize.js';
 
-// Импортируем модели
 import User from './Users.js';
 import { Tweet, PostImage } from './Post.js';
 import Like from './Like.js';
 
-// Устанавливаем ассоциации
 User.hasMany(Tweet, { foreignKey: 'userId', as: 'tweets' });
 Tweet.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 

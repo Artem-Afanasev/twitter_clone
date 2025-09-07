@@ -17,6 +17,11 @@ export const api = axios.create({
     baseURL: API_URL,
 });
 
+export interface PostImage {
+    imageUrl: string;
+    order: number;
+}
+
 export interface Tweet {
     id: number;
     content: string;
@@ -24,11 +29,23 @@ export interface Tweet {
     createdAt: string;
     updatedAt: string;
     user?: User;
+    images: string[];
 }
 
 export interface CreateTweetResponse {
     message: string;
     tweet: Tweet;
+}
+
+export interface LikeResponse {
+    message: string;
+    likeCount: number;
+    likeId?: number;
+}
+
+export interface CheckLikeResponse {
+    liked: boolean;
+    likeId: number | null;
 }
 
 // Добавим в объект api методы для работы с твитами
@@ -58,6 +75,32 @@ export const tweetAPI = {
     // Метод для получения всех твитов (если нужно)
     getAllTweets: async (): Promise<Tweet[]> => {
         const response = await api.get<Tweet[]>('/home');
+        return response.data;
+    },
+
+    likeTweet: async (postId: number): Promise<LikeResponse> => {
+        const response = await api.post<LikeResponse>(`/posts/${postId}/like`);
+        return response.data;
+    },
+
+    unlikeTweet: async (postId: number): Promise<LikeResponse> => {
+        const response = await api.delete<LikeResponse>(
+            `/posts/${postId}/like`
+        );
+        return response.data;
+    },
+
+    checkUserLike: async (postId: number): Promise<CheckLikeResponse> => {
+        const response = await api.get<CheckLikeResponse>(
+            `/posts/${postId}/like`
+        );
+        return response.data;
+    },
+
+    getTweetLikes: async (postId: number): Promise<{ likeCount: number }> => {
+        const response = await api.get<{ likeCount: number }>(
+            `/posts/${postId}/likes`
+        );
         return response.data;
     },
 };
