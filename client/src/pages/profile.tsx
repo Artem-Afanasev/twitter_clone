@@ -3,12 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { profileAPI, User } from '../services/api';
 import CreatePost from '../components/CreatePost';
 import UserPosts from '../components/UserPosts';
+import LikedPosts from '../components/LikedPosts'; // ← Добавляем импорт
 import '../styles/Profile.css';
 
 // Создаем расширенный интерфейс с avatar
 interface UserWithAvatar extends User {
     avatar?: string;
 }
+
+// Тип для вкладок
+type ProfileTab = 'posts' | 'liked';
 
 const Profile: React.FC = () => {
     const [user, setUser] = useState<UserWithAvatar | null>(null);
@@ -20,6 +24,7 @@ const Profile: React.FC = () => {
     });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<ProfileTab>('posts'); // ← Добавляем состояние активной вкладки
 
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -34,9 +39,6 @@ const Profile: React.FC = () => {
             console.log('🔄 Fetching profile...');
             const response = await profileAPI.getProfile();
             console.log('✅ API Response:', response);
-            console.log('📦 Raw user data:', response.user);
-            console.log('🖼️ Avatar from API:', response.user.avatar);
-            console.log('🔍 Avatar type:', typeof response.user.avatar);
 
             const userData = response.user as UserWithAvatar;
             setUser(userData);
@@ -59,8 +61,6 @@ const Profile: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             setAvatarFile(file);
-
-            // Создаем preview для предпросмотра
             const reader = new FileReader();
             reader.onload = (e) => {
                 setAvatarPreview(e.target?.result as string);
@@ -79,12 +79,10 @@ const Profile: React.FC = () => {
             );
             const updatedUser = response.user as UserWithAvatar;
 
-            // Обновляем состояние
             setUser(updatedUser);
             setEditMode(false);
             setMessage('✅ Профиль успешно обновлен!');
 
-            // Обновляем localStorage
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
@@ -94,11 +92,8 @@ const Profile: React.FC = () => {
                 localStorage.setItem('user', JSON.stringify(userData));
             }
 
-            // Сбрасываем preview и файл
             setAvatarFile(null);
             setAvatarPreview(null);
-
-            // Обновляем данные профиля без перезагрузки
             fetchProfile();
         } catch (error: any) {
             setMessage(
@@ -141,7 +136,6 @@ const Profile: React.FC = () => {
                 {/* Левая колонка - информация о пользователе */}
                 <div className="profile-sidebar">
                     <div className="user-card">
-                        {/* Заменяем букву на аватар */}
                         <div className="user-avatar">
                             {user?.avatar ? (
                                 <img
@@ -155,12 +149,6 @@ const Profile: React.FC = () => {
                                         );
                                         e.currentTarget.style.display = 'none';
                                     }}
-                                    onLoad={() =>
-                                        console.log(
-                                            '✅ Image loaded:',
-                                            user.avatar
-                                        )
-                                    }
                                 />
                             ) : (
                                 <span className="avatar-fallback">
@@ -212,7 +200,6 @@ const Profile: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Форма редактирования */}
                     {editMode && (
                         <div className="edit-form">
                             <h3>✏️ Редактирование профиля</h3>
@@ -298,15 +285,34 @@ const Profile: React.FC = () => {
 
                 {/* Правая колонка - посты */}
                 <div className="profile-content">
-                    {/* Создание нового поста */}
-                    <CreatePost />
+                    {/* Навигационные табы */}
+                    <div className="profile-tabs">
+                        <button
+                            className={`tab-button ${
+                                activeTab === 'posts' ? 'active' : ''
+                            }`}
+                            onClick={() => setActiveTab('posts')}
+                        >
+                            📝 Мои посты
+                        </button>
+                        <button
+                            className={`tab-button ${
+                                activeTab === 'liked' ? 'active' : ''
+                            }`}
+                            onClick={() => setActiveTab('liked')}
+                        >
+                            ❤️ Лайкнутые посты
+                        </button>
+                    </div>
 
-                    {/* Лента постов пользователя */}
-                    {user && <UserPosts />}
+                    {/* Создание нового поста (только на вкладке "Мои посты") */}
+                    {activeTab === 'posts' && <CreatePost />}
+
+                    {/* Контент в зависимости от активной вкладки */}
+                    {activeTab === 'posts' ? <UserPosts /> : <LikedPosts />}
                 </div>
             </div>
 
-            {/* Сообщения */}
             {message && (
                 <div
                     className={`message ${

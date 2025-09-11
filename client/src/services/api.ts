@@ -7,9 +7,15 @@ export interface User {
     id: number;
     username: string;
     email: string;
-    createdAt?: string;
+    createdAt: string;
     updatedAt?: string;
     avatar?: string;
+    postsCount: number;
+}
+
+export interface UserProfileResponse {
+    user: User;
+    posts: Tweet[];
 }
 
 // Создаем экземпляр axios с базовой конфигурацией
@@ -30,6 +36,7 @@ export interface Tweet {
     updatedAt: string;
     user?: User;
     images: string[];
+    likesCount: number;
 }
 
 export interface CreateTweetResponse {
@@ -79,28 +86,33 @@ export const tweetAPI = {
     },
 
     likeTweet: async (postId: number): Promise<LikeResponse> => {
-        const response = await api.post<LikeResponse>(`/posts/${postId}/like`);
+        const response = await api.post<LikeResponse>(`/likes/${postId}/like`);
         return response.data;
     },
 
     unlikeTweet: async (postId: number): Promise<LikeResponse> => {
         const response = await api.delete<LikeResponse>(
-            `/posts/${postId}/like`
+            `/likes/${postId}/like`
         );
         return response.data;
     },
 
     checkUserLike: async (postId: number): Promise<CheckLikeResponse> => {
         const response = await api.get<CheckLikeResponse>(
-            `/posts/${postId}/like`
+            `/likes/${postId}/like`
         );
         return response.data;
     },
 
     getTweetLikes: async (postId: number): Promise<{ likeCount: number }> => {
         const response = await api.get<{ likeCount: number }>(
-            `/posts/${postId}/likes`
+            `/likes/${postId}/likes`
         );
+        return response.data;
+    },
+
+    getUserLikedTweets: async (): Promise<Tweet[]> => {
+        const response = await api.get<Tweet[]>('/likes/user/liked-posts');
         return response.data;
     },
 };
@@ -159,6 +171,13 @@ export const authAPI = {
 export const profileAPI = {
     getProfile: async (): Promise<ProfileResponse> => {
         const response = await api.get<ProfileResponse>('/profile');
+        return response.data;
+    },
+
+    getUserProfile: async (userId: number): Promise<UserProfileResponse> => {
+        const response = await api.get<UserProfileResponse>(
+            `/usersprofile/${userId}`
+        );
         return response.data;
     },
 

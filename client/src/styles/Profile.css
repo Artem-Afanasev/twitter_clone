@@ -230,6 +230,53 @@
     border: 1px solid #f5c6cb;
 }
 
+profile-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.tab-button {
+    padding: 12px 24px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #657786;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #f5f8fa;
+    color: #1da1f2;
+}
+
+.tab-button.active {
+    color: #1da1f2;
+    border-bottom-color: #1da1f2;
+    background-color: #f5f8fa;
+}
+
+.back-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #1da1f2;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    text-align: center;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+    background-color: #1a91da;
+    text-decoration: none;
+    color: white;
+}
+
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
     .profile-layout {

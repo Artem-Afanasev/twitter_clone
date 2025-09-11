@@ -1,6 +1,7 @@
 // components/HomeFeed.tsx
 import React, { useState, useEffect } from 'react';
 import { tweetAPI, Tweet } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
 interface Post extends Tweet {
     likesCount: number;
@@ -8,6 +9,7 @@ interface Post extends Tweet {
 }
 
 const HomeFeed: React.FC = () => {
+    const navigate = useNavigate();
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -22,16 +24,18 @@ const HomeFeed: React.FC = () => {
             const allPosts = await tweetAPI.getAllTweets();
             console.log('✅ Получено постов:', allPosts.length);
 
-            // Для каждого поста проверяем, лайкнул ли его текущий пользователь
+            // Для каждого поста проверяем, лайкнул ли его текущий пользователь И получаем актуальное количество лайков
             const postsWithLikes = await Promise.all(
                 allPosts.map(async (post: any) => {
                     try {
-                        const likeStatus = await tweetAPI.checkUserLike(
-                            post.id
-                        );
+                        const [likeStatus, likesInfo] = await Promise.all([
+                            tweetAPI.checkUserLike(post.id),
+                            tweetAPI.getTweetLikes(post.id),
+                        ]);
+
                         return {
                             ...post,
-                            likesCount: post.likesCount || 0,
+                            likesCount: likesInfo.likeCount || 0, // ← ИСПРАВЛЕНО: используем актуальное количество
                             isLiked: likeStatus.liked,
                         };
                     } catch (error) {
@@ -57,10 +61,13 @@ const HomeFeed: React.FC = () => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
         fetchAllPosts();
     }, []);
+
+    const handleUserClick = (userId: number) => {
+        navigate(`/usersprofile/${userId}`);
+    };
 
     const handleLike = async (postId: number, currentlyLiked: boolean) => {
         try {
@@ -108,7 +115,9 @@ const HomeFeed: React.FC = () => {
                         fontWeight: 'bold',
                         fontSize: '18px',
                         flexShrink: 0,
+                        cursor: 'pointer', // Добавьте курсор
                     }}
+                    onClick={() => user?.id && handleUserClick(user.id)}
                 >
                     U
                 </div>
@@ -126,7 +135,9 @@ const HomeFeed: React.FC = () => {
                         borderRadius: '50%',
                         objectFit: 'cover',
                         border: '2px solid #1da1f2',
+                        cursor: 'pointer', // Добавьте курсор
                     }}
+                    onClick={() => handleUserClick(user.id)}
                     onError={(e) => {
                         e.currentTarget.style.display = 'none';
                     }}
@@ -148,7 +159,9 @@ const HomeFeed: React.FC = () => {
                     fontWeight: 'bold',
                     fontSize: '18px',
                     flexShrink: 0,
+                    cursor: 'pointer', // Добавьте курсор
                 }}
+                onClick={() => handleUserClick(user.id)}
             >
                 {user?.username?.charAt(0)?.toUpperCase() || 'U'}
             </div>
@@ -253,29 +266,35 @@ const HomeFeed: React.FC = () => {
                                     alignItems: 'center',
                                     marginBottom: '15px',
                                     gap: '12px',
+                                    justifyContent: 'flex-start', // выравниваем по левому краю
+                                    width: '100%',
                                 }}
                             >
-                                {/* Аватар пользователя */}
                                 {renderAvatar(post.user)}
-
-                                <div>
+                                <div
+                                    style={{
+                                        marginLeft: '0',
+                                        width: 'calc(100% - 60px)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                    }}
+                                >
                                     <div
                                         style={{
                                             fontWeight: 'bold',
                                             color: '#14171a',
                                             fontSize: '16px',
+                                            marginRight: '12px',
+                                            cursor: 'pointer', // Добавьте курсор
+                                            textDecoration: 'underline', // Подчеркивание для интерактивности
                                         }}
+                                        onClick={() =>
+                                            post.user?.id &&
+                                            handleUserClick(post.user.id)
+                                        }
                                     >
                                         {post.user?.username ||
                                             'Неизвестный автор'}
-                                    </div>
-                                    <div
-                                        style={{
-                                            color: '#657786',
-                                            fontSize: '14px',
-                                        }}
-                                    >
-                                        @{post.user?.username || 'unknown'}
                                     </div>
                                 </div>
                             </div>
@@ -373,57 +392,35 @@ const HomeFeed: React.FC = () => {
                                     style={{
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: '6px',
+                                        gap: '8px',
                                         padding: '8px 16px',
                                         border: 'none',
                                         borderRadius: '20px',
-                                        backgroundColor: post.isLiked
-                                            ? '#f91880'
-                                            : '#f7f9fa',
-                                        color: post.isLiked
-                                            ? 'white'
-                                            : '#657786',
+                                        backgroundColor: '#f7f9fa',
+                                        color: '#657786',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s ease',
                                         fontSize: '14px',
                                         fontWeight: 'bold',
+                                        marginLeft: 'auto',
                                     }}
                                     onMouseEnter={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            post.isLiked
-                                                ? '#e01670'
-                                                : '#e1e8ed';
+                                            '#e1e8ed';
                                     }}
                                     onMouseLeave={(e) => {
                                         e.currentTarget.style.backgroundColor =
-                                            post.isLiked
-                                                ? '#f91880'
-                                                : '#f7f9fa';
+                                            '#f7f9fa';
                                     }}
                                 >
                                     <span style={{ fontSize: '18px' }}>
                                         {post.isLiked ? '❤️' : '🤍'}
                                     </span>
-                                    Нравится
+                                    <span style={{ fontWeight: 'bold' }}>
+                                        {post.likesCount}{' '}
+                                        {/* ← СЧЕТЧИК НА КНОПКЕ */}
+                                    </span>
                                 </button>
-
-                                <span
-                                    style={{
-                                        color: post.isLiked
-                                            ? '#f91880'
-                                            : '#657786',
-                                        fontSize: '14px',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {post.likesCount}{' '}
-                                    {post.likesCount === 1
-                                        ? 'лайк'
-                                        : post.likesCount > 1 &&
-                                          post.likesCount < 5
-                                        ? 'лайка'
-                                        : 'лайков'}
-                                </span>
                             </div>
 
                             {/* Модальное окно для просмотра изображения */}
@@ -446,7 +443,7 @@ const HomeFeed: React.FC = () => {
                                 >
                                     <img
                                         src={expandedImage}
-                                        alt='Увеличенное изображение'
+                                        alt="Увеличенное изображение"
                                         style={{
                                             maxWidth: '90%',
                                             maxHeight: '90%',

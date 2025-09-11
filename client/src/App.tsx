@@ -9,6 +9,7 @@ import {
 import Register from './pages/register';
 import Login from './pages/login';
 import Profile from './pages/profile';
+import UserProfile from './pages/UsersProfile';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation'; // ← Добавляем импорт
 import './App.css';
@@ -63,6 +64,14 @@ const App: React.FC = () => {
                         element={
                             <ProtectedRoute>
                                 <Profile />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/usersprofile/:userId"
+                        element={
+                            <ProtectedRoute>
+                                <UserProfile />
                             </ProtectedRoute>
                         }
                     />

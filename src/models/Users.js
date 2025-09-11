@@ -18,6 +18,24 @@ const User = sequelize.define(
                 len: [3, 30],
             },
         },
+
+        birthdate: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            validate: {
+                isDate: true,
+                isBefore: new Date().toISOString(),
+            },
+        },
+
+        info: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            validate: {
+                len: [1, 250],
+            },
+        },
+
         email: {
             type: DataTypes.STRING,
             allowNull: false,
