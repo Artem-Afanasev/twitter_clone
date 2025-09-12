@@ -7,7 +7,15 @@ export const getProfile = async (req, res) => {
     try {
         const userId = req.userId;
         const user = await User.findByPk(userId, {
-            attributes: ['id', 'username', 'email', 'createdAt', 'avatar'],
+            attributes: [
+                'id',
+                'username',
+                'email',
+                'createdAt',
+                'avatar',
+                'info',
+                'birthdate',
+            ],
         });
 
         if (!user) {
@@ -26,6 +34,8 @@ export const getProfile = async (req, res) => {
                 username: user.username,
                 email: user.email,
                 avatar: avatarUrl,
+                info: user.info,
+                birthdate: user.birthdate,
                 createdAt: user.createdAt,
             },
         });
@@ -40,8 +50,12 @@ const __dirname = path.dirname(__filename);
 export const updateProfile = async (req, res) => {
     try {
         const userId = req.userId;
-        const { username, email } = req.body;
+
+        const { username, info, birthdate } = req.body;
         let avatarPath = undefined;
+
+        console.log('📦 Received form data:', { username, info, birthdate });
+        console.log('📁 Files:', req.files);
 
         const user = await User.findByPk(userId);
         if (!user) {
@@ -77,8 +91,9 @@ export const updateProfile = async (req, res) => {
             avatarPath = `/uploads/avatars/${fileName}`;
         }
 
-        if (username) user.username = username;
-        if (email) user.email = email;
+        if (username !== undefined) user.username = username;
+        if (info !== undefined) user.info = info;
+        if (birthdate !== undefined) user.birthdate = birthdate;
         if (avatarPath !== undefined) user.avatar = avatarPath;
 
         await user.save();
@@ -94,15 +109,16 @@ export const updateProfile = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
+                info: user.info,
+                birthdate: user.birthdate,
                 avatar: avatarUrl,
                 updatedAt: user.updatedAt,
             },
         });
     } catch (error) {
+        console.error('❌ Update profile error:', error);
         if (error.name === 'SequelizeUniqueConstraintError') {
-            return res
-                .status(400)
-                .json({ error: 'Email or username already exists' });
+            return res.status(400).json({ error: 'Username already exists' });
         }
         res.status(500).json({ error: error.message });
     }

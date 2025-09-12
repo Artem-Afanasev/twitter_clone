@@ -8,8 +8,37 @@ const __dirname = path.dirname(__filename);
 
 export const register = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { username, email, password, birthdate } = req.body;
         let avatarPath = '';
+
+        if (birthdate) {
+            const birthDate = new Date(birthdate);
+            const currentDate = new Date();
+
+            if (birthDate >= currentDate) {
+                return res.status(400).json({
+                    error: 'Дата рождения должна быть в прошлом',
+                });
+            }
+
+            const minAgeDate = new Date();
+            minAgeDate.setFullYear(currentDate.getFullYear() - 13);
+
+            if (birthDate > minAgeDate) {
+                return res.status(400).json({
+                    error: 'Пользователь должен быть старше 13 лет',
+                });
+            }
+
+            const maxAgeDate = new Date();
+            maxAgeDate.setFullYear(currentDate.getFullYear() - 120);
+
+            if (birthDate < maxAgeDate) {
+                return res.status(400).json({
+                    error: 'Пожалуйста, укажите реальную дату рождения',
+                });
+            }
+        }
 
         if (req.files && req.files.avatar) {
             const avatar = req.files.avatar;
@@ -39,6 +68,7 @@ export const register = async (req, res) => {
             username,
             email,
             password,
+            birthdate: birthdate || null,
             avatar: avatarPath,
         });
 
@@ -48,6 +78,7 @@ export const register = async (req, res) => {
                 id: user.id,
                 username: user.username,
                 email: user.email,
+                birthdate: user.birthdate,
                 avatar: user.avatar,
             },
         });

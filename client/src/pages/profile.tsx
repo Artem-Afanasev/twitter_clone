@@ -3,28 +3,30 @@ import React, { useState, useEffect } from 'react';
 import { profileAPI, User } from '../services/api';
 import CreatePost from '../components/CreatePost';
 import UserPosts from '../components/UserPosts';
-import LikedPosts from '../components/LikedPosts'; // ← Добавляем импорт
+import LikedPosts from '../components/LikedPosts';
 import '../styles/Profile.css';
 
-// Создаем расширенный интерфейс с avatar
-interface UserWithAvatar extends User {
+// Создаем расширенный интерфейс с новыми полями
+interface UserWithProfile extends User {
     avatar?: string;
+    birthdate?: string;
+    info?: string;
 }
 
 // Тип для вкладок
 type ProfileTab = 'posts' | 'liked';
 
 const Profile: React.FC = () => {
-    const [user, setUser] = useState<UserWithAvatar | null>(null);
+    const [user, setUser] = useState<UserWithProfile | null>(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
-        email: '',
-        avatar: '',
+        info: '',
+        birthdate: '',
     });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<ProfileTab>('posts'); // ← Добавляем состояние активной вкладки
+    const [activeTab, setActiveTab] = useState<ProfileTab>('posts');
 
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -40,12 +42,14 @@ const Profile: React.FC = () => {
             const response = await profileAPI.getProfile();
             console.log('✅ API Response:', response);
 
-            const userData = response.user as UserWithAvatar;
+            const userData = response.user as UserWithProfile;
             setUser(userData);
             setFormData({
                 username: userData.username,
-                email: userData.email,
-                avatar: userData.avatar || '',
+                info: userData.info || '',
+                birthdate: userData.birthdate
+                    ? userData.birthdate.split('T')[0]
+                    : '',
             });
         } catch (error: any) {
             console.error('❌ Profile fetch error:', error);
@@ -74,10 +78,11 @@ const Profile: React.FC = () => {
         try {
             const response = await profileAPI.updateProfile(
                 formData.username,
-                formData.email,
+                formData.info,
+                formData.birthdate,
                 avatarFile || undefined
             );
-            const updatedUser = response.user as UserWithAvatar;
+            const updatedUser = response.user as UserWithProfile;
 
             setUser(updatedUser);
             setEditMode(false);
@@ -87,7 +92,8 @@ const Profile: React.FC = () => {
             if (storedUser) {
                 const userData = JSON.parse(storedUser);
                 userData.username = updatedUser.username;
-                userData.email = updatedUser.email;
+                userData.info = updatedUser.info;
+                userData.birthdate = updatedUser.birthdate;
                 userData.avatar = updatedUser.avatar;
                 localStorage.setItem('user', JSON.stringify(userData));
             }
@@ -102,7 +108,9 @@ const Profile: React.FC = () => {
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
@@ -113,6 +121,37 @@ const Profile: React.FC = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         window.location.href = '/login';
+    };
+
+    // Функция для форматирования даты рождения
+    const formatBirthdate = (birthdate: string | undefined) => {
+        if (!birthdate) return 'Не указана';
+
+        const date = new Date(birthdate);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        });
+    };
+
+    // Функция для вычисления возраста
+    const calculateAge = (birthdate: string | undefined) => {
+        if (!birthdate) return null;
+
+        const birthDate = new Date(birthdate);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+            age--;
+        }
+
+        return age;
     };
 
     if (loading) {
@@ -161,16 +200,53 @@ const Profile: React.FC = () => {
                         <h2 className="username">@{user?.username}</h2>
 
                         <div className="user-info">
+                            {/* Дата рождения и возраст */}
                             <div className="info-item">
-                                <span className="label">📧 Email:</span>
-                                <span className="value">{user?.email}</span>
+                                <span className="label">🎂 Дата рождения:</span>
+                                <span className="value">
+                                    {formatBirthdate(user?.birthdate)}
+                                    {user?.birthdate && (
+                                        <span
+                                            style={{
+                                                marginLeft: '8px',
+                                                color: '#657786',
+                                            }}
+                                        >
+                                            ({calculateAge(user.birthdate)} лет)
+                                        </span>
+                                    )}
+                                </span>
                             </div>
 
-                            <div className="info-item">
-                                <span className="label">🆔 ID:</span>
-                                <span className="value">#{user?.id}</span>
-                            </div>
+                            {/* Описание профиля */}
+                            {user?.info && (
+                                <div
+                                    className="info-item"
+                                    style={{
+                                        flexDirection: 'column',
+                                        alignItems: 'flex-start',
+                                    }}
+                                >
+                                    <span
+                                        className="label"
+                                        style={{ marginBottom: '5px' }}
+                                    >
+                                        📝 О себе:
+                                    </span>
+                                    <span
+                                        className="value"
+                                        style={{
+                                            fontStyle: 'italic',
+                                            lineHeight: '1.4',
+                                            color: '#2d3748',
+                                        }}
+                                    >
+                                        {user.info}
+                                    </span>
+                                </div>
+                            )}
 
+                            {/* Дата регистрации */}
                             <div className="info-item">
                                 <span className="label">📅 Регистрация:</span>
                                 <span className="value">
@@ -188,7 +264,7 @@ const Profile: React.FC = () => {
                                 onClick={() => setEditMode(true)}
                                 className="edit-btn"
                             >
-                                ✏️ Редактировать
+                                ✏️ Редактировать профиль
                             </button>
 
                             <button
@@ -216,14 +292,49 @@ const Profile: React.FC = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>Email:</label>
+                                    <label>🎂 Дата рождения:</label>
                                     <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
+                                        type="date"
+                                        name="birthdate"
+                                        value={formData.birthdate}
                                         onChange={handleChange}
-                                        required
                                     />
+                                    <small
+                                        style={{
+                                            color: '#657786',
+                                            fontSize: '12px',
+                                        }}
+                                    >
+                                        Необязательно
+                                    </small>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>📝 О себе:</label>
+                                    <textarea
+                                        name="info"
+                                        value={formData.info}
+                                        onChange={handleChange}
+                                        placeholder="Расскажите немного о себе..."
+                                        rows={3}
+                                        maxLength={250}
+                                        style={{
+                                            width: '100%',
+                                            padding: '8px',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '4px',
+                                            resize: 'vertical',
+                                            fontFamily: 'inherit',
+                                        }}
+                                    />
+                                    <small
+                                        style={{
+                                            color: '#657786',
+                                            fontSize: '12px',
+                                        }}
+                                    >
+                                        {formData.info.length}/250 символов
+                                    </small>
                                 </div>
 
                                 <div className="form-group">
@@ -269,8 +380,12 @@ const Profile: React.FC = () => {
                                             setEditMode(false);
                                             setFormData({
                                                 username: user?.username || '',
-                                                email: user?.email || '',
-                                                avatar: user?.avatar || '',
+                                                info: user?.info || '',
+                                                birthdate: user?.birthdate
+                                                    ? user.birthdate.split(
+                                                          'T'
+                                                      )[0]
+                                                    : '',
                                             });
                                         }}
                                         className="cancel-btn"
@@ -305,7 +420,7 @@ const Profile: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Создание нового поста (только на вкладке "Мои посты") */}
+                    {/* Создание нового поста */}
                     {activeTab === 'posts' && <CreatePost />}
 
                     {/* Контент в зависимости от активной вкладки */}

@@ -1,4 +1,3 @@
-// controllers/profile/getUserProfile.js
 import { User, Tweet, PostImage, Like } from '../../models/index.js';
 
 export const getUserProfile = async (req, res) => {
@@ -11,7 +10,14 @@ export const getUserProfile = async (req, res) => {
         );
 
         const user = await User.findByPk(userId, {
-            attributes: ['id', 'username', 'email', 'avatar', 'createdAt'],
+            attributes: [
+                'id',
+                'username',
+                'avatar',
+                'createdAt',
+                'info',
+                'birthdate',
+            ],
             raw: true,
         });
 
@@ -39,7 +45,6 @@ export const getUserProfile = async (req, res) => {
 
         console.log(`✅ Найдено постов пользователя: ${userPosts.length}`);
 
-        // Получаем все лайки текущего пользователя для этих постов
         const userLikes = await Like.findAll({
             where: {
                 userId: currentUserId,
@@ -51,7 +56,6 @@ export const getUserProfile = async (req, res) => {
 
         const likedPostIds = userLikes.map((like) => like.tweetId);
 
-        // Получаем количество лайков для каждого поста
         const postsWithLikesCount = await Promise.all(
             userPosts.map(async (post) => {
                 const likeCount = await Like.count({
@@ -88,9 +92,8 @@ export const getUserProfile = async (req, res) => {
                     postData.images = [];
                 }
 
-                // Добавляем информацию о лайке текущего пользователя и количество лайков
                 postData.isLiked = likedPostIds.includes(post.id);
-                postData.likesCount = likeCount; // ← Добавляем количество лайков
+                postData.likesCount = likeCount;
 
                 return postData;
             }
@@ -104,10 +107,10 @@ export const getUserProfile = async (req, res) => {
             user: {
                 id: user.id,
                 username: user.username,
-                email: user.email,
-                avatar: user.avatar,
-                createdAt: user.createdAt,
-                postsCount: userPosts.length,
+                info: user.info,
+                birthdate: user.birthdate,
+                avatar: avatarUrl,
+                updatedAt: user.updatedAt,
             },
             posts: formattedPosts,
         };

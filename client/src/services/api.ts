@@ -11,6 +11,8 @@ export interface User {
     updatedAt?: string;
     avatar?: string;
     postsCount: number;
+    birthdate?: string;
+    info?: string;
 }
 
 export interface UserProfileResponse {
@@ -183,12 +185,14 @@ export const profileAPI = {
 
     updateProfile: async (
         username: string,
-        email: string,
-        avatarFile?: File // Меняем на File вместо string
+        info: string,
+        birthdate: string,
+        avatarFile?: File
     ): Promise<ProfileResponse> => {
         const formData = new FormData();
         formData.append('username', username);
-        formData.append('email', email);
+        formData.append('info', info);
+        formData.append('birthdate', birthdate);
 
         if (avatarFile) {
             formData.append('avatar', avatarFile);
