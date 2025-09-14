@@ -3,6 +3,7 @@ import sequelize from '../database/sequelize.js';
 import User from './Users.js';
 import { Tweet, PostImage } from './Post.js';
 import Like from './Like.js';
+import Subscription from './Subscription.js';
 
 User.hasMany(Tweet, { foreignKey: 'userId', as: 'tweets' });
 Tweet.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -16,15 +17,18 @@ Like.belongsTo(User, { foreignKey: 'userId' });
 Tweet.hasMany(Like, { foreignKey: 'tweetId' });
 Like.belongsTo(Tweet, { foreignKey: 'tweetId' });
 
+Subscription.belongsTo(User, { as: 'follower', foreignKey: 'followerId' });
+Subscription.belongsTo(User, { as: 'following', foreignKey: 'followingId' });
+
 User.belongsToMany(User, {
-    through: 'user_followers',
+    through: 'Subscription',
     as: 'followers',
     foreignKey: 'followingId',
     otherKey: 'followerId',
 });
 
 User.belongsToMany(User, {
-    through: 'user_followers',
+    through: 'Subscription',
     as: 'following',
     foreignKey: 'followerId',
     otherKey: 'followingId',
@@ -32,4 +36,4 @@ User.belongsToMany(User, {
 
 console.log('✅ Все модели и ассоциации инициализированы');
 
-export { sequelize, User, Tweet, PostImage, Like };
+export { sequelize, User, Tweet, PostImage, Like, Subscription };

@@ -10,14 +10,7 @@ export const getUserProfile = async (req, res) => {
         );
 
         const user = await User.findByPk(userId, {
-            attributes: [
-                'id',
-                'username',
-                'avatar',
-                'createdAt',
-                'info',
-                'birthdate',
-            ],
+            attributes: ['id', 'username', 'avatar', 'info', 'birthdate'],
             raw: true,
         });
 
@@ -99,8 +92,9 @@ export const getUserProfile = async (req, res) => {
             }
         );
 
-        if (user.avatar && !user.avatar.startsWith('http')) {
-            user.avatar = `http://localhost:5000${user.avatar}`;
+        let avatarUrl = user.avatar;
+        if (avatarUrl && !avatarUrl.startsWith('http')) {
+            avatarUrl = `http://localhost:5000${avatarUrl}`;
         }
 
         const response = {
@@ -110,7 +104,6 @@ export const getUserProfile = async (req, res) => {
                 info: user.info,
                 birthdate: user.birthdate,
                 avatar: avatarUrl,
-                updatedAt: user.updatedAt,
             },
             posts: formattedPosts,
         };

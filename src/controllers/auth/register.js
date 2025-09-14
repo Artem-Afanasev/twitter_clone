@@ -55,13 +55,20 @@ export const register = async (req, res) => {
                     .json({ error: 'Недопустимый тип файла' });
             }
 
-            const uploadDir = path.join(__dirname, '../uploads/avatars');
+            // ИСПРАВЛЕННЫЙ ПУТЬ - используем корневую папку uploads
+            const uploadDir = path.join(process.cwd(), 'uploads', 'avatars'); // ← Исправлено!
+
+            // Убедимся что папка существует
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+
             const fileExtension = path.extname(avatar.name);
             const fileName = `user_${Date.now()}${fileExtension}`;
             const filePath = path.join(uploadDir, fileName);
 
             await avatar.mv(filePath);
-            avatarPath = `/uploads/avatars/${fileName}`;
+            avatarPath = `/uploads/avatars/${fileName}`; // ← Путь для БД
         }
 
         const user = await User.create({
