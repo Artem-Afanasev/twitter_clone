@@ -5,13 +5,11 @@ export const likeTweet = async (req, res) => {
         const userId = req.userId;
         const { tweetId } = req.params;
 
-        console.log(
-            `🔄 Пользователь ${userId} пытается лайкнуть твит ${tweetId}`
-        );
+        console.log(`Пользователь ${userId} пытается лайкнуть твит ${tweetId}`);
 
         const tweet = await Tweet.findByPk(tweetId);
         if (!tweet) {
-            console.log('❌ Твит не найден');
+            console.log('Твит не найден');
             return res.status(404).json({ error: 'Твит не найден' });
         }
 

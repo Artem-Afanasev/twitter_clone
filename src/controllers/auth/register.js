@@ -55,10 +55,8 @@ export const register = async (req, res) => {
                     .json({ error: 'Недопустимый тип файла' });
             }
 
-            // ИСПРАВЛЕННЫЙ ПУТЬ - используем корневую папку uploads
-            const uploadDir = path.join(process.cwd(), 'uploads', 'avatars'); // ← Исправлено!
+            const uploadDir = path.join(process.cwd(), 'uploads', 'avatars');
 
-            // Убедимся что папка существует
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
             }
@@ -68,7 +66,7 @@ export const register = async (req, res) => {
             const filePath = path.join(uploadDir, fileName);
 
             await avatar.mv(filePath);
-            avatarPath = `/uploads/avatars/${fileName}`; // ← Путь для БД
+            avatarPath = `/uploads/avatars/${fileName}`;
         }
 
         const user = await User.create({

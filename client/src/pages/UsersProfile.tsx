@@ -1,7 +1,9 @@
 // pages/UserProfile.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { profileAPI, tweetAPI } from '../services/api';
+import { profileAPI, tweetAPI, subscriptionAPI } from '../services/api';
+import SubscribeButton from '../components/SubscribeButton';
+import SubscriptionStats from '../components/SubscriptionStats';
 import '../styles/Profile.css';
 
 interface UserProfile {
@@ -39,6 +41,10 @@ const UserProfile: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
+    const [subscriptionStats, setSubscriptionStats] = useState({
+        followersCount: 0,
+        followingCount: 0,
+    });
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -55,6 +61,10 @@ const UserProfile: React.FC = () => {
 
                 setUser(response.user);
                 setPosts(response.posts || []);
+
+                const statsResponse =
+                    await subscriptionAPI.getSubscriptionStats(Number(userId));
+                setSubscriptionStats(statsResponse);
             } catch (err: any) {
                 console.error('❌ Ошибка загрузки профиля:', err);
                 setError(
@@ -165,39 +175,68 @@ const UserProfile: React.FC = () => {
     }
 
     return (
-        <div className='profile-container'>
-            <div className='profile-layout'>
+        <div className="profile-container">
+            <div className="profile-layout">
                 {/* Левая колонка - информация о пользователе */}
-                <div className='profile-sidebar'>
-                    <div className='user-card'>
-                        <div className='user-avatar'>
+                <div className="profile-sidebar">
+                    <div className="user-card">
+                        <div className="user-avatar">
                             {user.avatar ? (
                                 <img
                                     src={user.avatar}
                                     alt={user.username}
-                                    className='avatar-image'
+                                    className="avatar-image"
                                     onError={(e) => {
                                         e.currentTarget.style.display = 'none';
                                     }}
                                 />
                             ) : (
-                                <span className='avatar-fallback'>
+                                <span className="avatar-fallback">
                                     {user.username?.charAt(0)?.toUpperCase() ||
                                         'U'}
                                 </span>
                             )}
                         </div>
 
-                        <h2 className='username'>@{user.username}</h2>
+                        <h2 className="username">@{user.username}</h2>
 
-                        <div className='user-info'>
+                        <div style={{ marginBottom: '15px' }}>
+                            <SubscriptionStats
+                                userId={user.id}
+                                onFollowersClick={() =>
+                                    console.log('Show followers modal')
+                                }
+                                showFollowing={false} // Скрываем подписки у других пользователей
+                                isCurrentUser={false} // Это не текущий пользователь
+                            />
+                        </div>
+
+                        {/* Кнопка подписки */}
+                        <div
+                            className="subscribe-container"
+                            style={{ marginBottom: '20px' }}
+                        >
+                            <SubscribeButton
+                                targetUserId={user.id}
+                                onSubscriptionChange={(subscribed) => {
+                                    setSubscriptionStats((prev) => ({
+                                        ...prev,
+                                        followersCount: subscribed
+                                            ? prev.followersCount + 1
+                                            : prev.followersCount - 1,
+                                    }));
+                                }}
+                            />
+                        </div>
+
+                        <div className="user-info">
                             {/* Дата рождения */}
                             {user.birthdate && (
-                                <div className='info-item'>
-                                    <span className='label'>
+                                <div className="info-item">
+                                    <span className="label">
                                         🎂 Дата рождения:
                                     </span>
-                                    <span className='value'>
+                                    <span className="value">
                                         {formatBirthdate(user.birthdate)}
                                         {user.birthdate && (
                                             <span
@@ -217,20 +256,20 @@ const UserProfile: React.FC = () => {
                             {/* Описание профиля */}
                             {user.info && (
                                 <div
-                                    className='info-item'
+                                    className="info-item"
                                     style={{
                                         flexDirection: 'column',
                                         alignItems: 'flex-start',
                                     }}
                                 >
                                     <span
-                                        className='label'
+                                        className="label"
                                         style={{ marginBottom: '5px' }}
                                     >
                                         📝 О себе:
                                     </span>
                                     <span
-                                        className='value'
+                                        className="value"
                                         style={{
                                             fontStyle: 'italic',
                                             lineHeight: '1.4',
@@ -244,11 +283,11 @@ const UserProfile: React.FC = () => {
 
                             {/* Дата регистрации */}
                             {user.createdAt && (
-                                <div className='info-item'>
-                                    <span className='label'>
+                                <div className="info-item">
+                                    <span className="label">
                                         📅 Регистрация:
                                     </span>
-                                    <span className='value'>
+                                    <span className="value">
                                         {new Date(
                                             user.createdAt
                                         ).toLocaleDateString('ru-RU')}
@@ -257,20 +296,20 @@ const UserProfile: React.FC = () => {
                             )}
 
                             {/* Количество постов */}
-                            <div className='info-item'>
-                                <span className='label'>📝 Постов:</span>
-                                <span className='value'>{posts.length}</span>
+                            <div className="info-item">
+                                <span className="label">📝 Постов:</span>
+                                <span className="value">{posts.length}</span>
                             </div>
                         </div>
 
-                        <Link to='/home' className='back-btn'>
+                        <Link to="/home" className="back-btn">
                             ← Назад к ленте
                         </Link>
                     </div>
                 </div>
 
                 {/* Правая колонка - посты пользователя */}
-                <div className='profile-content'>
+                <div className="profile-content">
                     <h3
                         style={{
                             marginBottom: '25px',
@@ -593,7 +632,7 @@ const UserProfile: React.FC = () => {
                         >
                             <img
                                 src={expandedImage}
-                                alt='Увеличенное изображение'
+                                alt="Увеличенное изображение"
                                 style={{
                                     maxWidth: '90%',
                                     maxHeight: '90%',

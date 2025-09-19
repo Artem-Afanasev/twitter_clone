@@ -1,11 +1,14 @@
 // components/HomeFeed.tsx
 import React, { useState, useEffect } from 'react';
-import { tweetAPI, Tweet } from '../services/api';
+import { tweetAPI, Tweet, commentAPI, Comment } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 interface Post extends Tweet {
     likesCount: number;
     isLiked?: boolean;
+    showComments?: boolean;
+    comments?: Comment[];
+    commentsLoading?: boolean;
 }
 
 const HomeFeed: React.FC = () => {
@@ -14,6 +17,7 @@ const HomeFeed: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [expandedImage, setExpandedImage] = useState<string | null>(null);
+    const [commentText, setCommentText] = useState('');
 
     const fetchAllPosts = async () => {
         try {
@@ -24,7 +28,6 @@ const HomeFeed: React.FC = () => {
             const allPosts = await tweetAPI.getAllTweets();
             console.log('✅ Получено постов:', allPosts.length);
 
-            // Для каждого поста проверяем, лайкнул ли его текущий пользователь И получаем актуальное количество лайков
             const postsWithLikes = await Promise.all(
                 allPosts.map(async (post: any) => {
                     try {
@@ -37,6 +40,9 @@ const HomeFeed: React.FC = () => {
                             ...post,
                             likesCount: likesInfo.likeCount || 0, // ← ИСПРАВЛЕНО: используем актуальное количество
                             isLiked: likeStatus.liked,
+                            showComments: false, // По умолчанию скрываем комментарии
+                            comments: [], // Пустой массив комментариев
+                            commentsLoading: false,
                         };
                     } catch (error) {
                         console.error(
@@ -47,6 +53,9 @@ const HomeFeed: React.FC = () => {
                             ...post,
                             likesCount: post.likesCount || 0,
                             isLiked: false,
+                            showComments: false,
+                            comments: [],
+                            commentsLoading: false,
                         };
                     }
                 })
@@ -97,6 +106,248 @@ const HomeFeed: React.FC = () => {
             console.error('❌ Ошибка при лайке:', error);
             // Можно добавить уведомление пользователю
         }
+    };
+
+    const loadComments = async (postId: number) => {
+        setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+                post.id === postId ? { ...post, commentsLoading: true } : post
+            )
+        );
+
+        try {
+            const comments = await commentAPI.getComments(postId);
+            setPosts((prevPosts) =>
+                prevPosts.map((post) =>
+                    post.id === postId
+                        ? { ...post, comments, commentsLoading: false }
+                        : post
+                )
+            );
+        } catch (error) {
+            console.error('❌ Ошибка загрузки комментариев:', error);
+            setPosts((prevPosts) =>
+                prevPosts.map((post) =>
+                    post.id === postId
+                        ? { ...post, commentsLoading: false }
+                        : post
+                )
+            );
+        }
+    };
+
+    const toggleComments = async (postId: number) => {
+        setPosts((prevPosts) =>
+            prevPosts.map((post) => {
+                if (post.id === postId) {
+                    const newShowComments = !post.showComments;
+
+                    // Если показываем комментарии и они еще не загружены - загружаем
+                    if (newShowComments && post.comments?.length === 0) {
+                        loadComments(postId);
+                    }
+
+                    return { ...post, showComments: newShowComments };
+                }
+                return post;
+            })
+        );
+    };
+
+    const handleSubmitComment = async (postId: number) => {
+        if (!commentText.trim()) return;
+
+        try {
+            const response = await commentAPI.createComment(
+                postId,
+                commentText.trim()
+            );
+
+            // Добавляем новый комментарий в список
+            setPosts((prevPosts) =>
+                prevPosts.map((post) =>
+                    post.id === postId
+                        ? {
+                              ...post,
+                              comments: [
+                                  response.comment,
+                                  ...(post.comments || []),
+                              ],
+                              showComments: true, // Показываем комментарии после отправки
+                          }
+                        : post
+                )
+            );
+
+            setCommentText(''); // Очищаем поле ввода
+        } catch (error) {
+            console.error('❌ Ошибка отправки комментария:', error);
+            alert('Ошибка при отправке комментария');
+        }
+    };
+    const renderComments = (post: Post) => {
+        if (!post.showComments) return null;
+
+        return (
+            <div
+                style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    backgroundColor: '#f7f9fa',
+                    borderRadius: '12px',
+                    border: '1px solid #e1e8ed',
+                }}
+            >
+                {/* Форма для нового комментария */}
+                <div style={{ marginBottom: '20px' }}>
+                    <textarea
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
+                        placeholder="Напишите комментарий..."
+                        style={{
+                            width: '100%',
+                            minHeight: '60px',
+                            padding: '12px',
+                            border: '1px solid #e1e8ed',
+                            borderRadius: '8px',
+                            resize: 'vertical',
+                            fontSize: '14px',
+                            marginBottom: '10px',
+                        }}
+                        maxLength={280}
+                    />
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <span
+                            style={{
+                                fontSize: '12px',
+                                color:
+                                    commentText.length === 280
+                                        ? '#ff4444'
+                                        : '#657786',
+                            }}
+                        >
+                            {commentText.length}/280
+                        </span>
+                        <button
+                            onClick={() => handleSubmitComment(post.id)}
+                            disabled={!commentText.trim()}
+                            style={{
+                                padding: '8px 16px',
+                                backgroundColor: commentText.trim()
+                                    ? '#1da1f2'
+                                    : '#aab8c2',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '20px',
+                                cursor: commentText.trim()
+                                    ? 'pointer'
+                                    : 'not-allowed',
+                                fontSize: '14px',
+                            }}
+                        >
+                            Отправить
+                        </button>
+                    </div>
+                </div>
+
+                {/* Список комментариев */}
+                {post.commentsLoading ? (
+                    <div
+                        style={{
+                            textAlign: 'center',
+                            padding: '20px',
+                            color: '#657786',
+                        }}
+                    >
+                        Загрузка комментариев...
+                    </div>
+                ) : post.comments && post.comments.length > 0 ? (
+                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        {post.comments.map((comment) => (
+                            <div
+                                key={comment.id}
+                                style={{
+                                    padding: '12px',
+                                    marginBottom: '10px',
+                                    backgroundColor: 'white',
+                                    borderRadius: '8px',
+                                    border: '1px solid #e1e8ed',
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '10px',
+                                    }}
+                                >
+                                    {comment.User && (
+                                        <div style={{ flexShrink: 0 }}>
+                                            {renderAvatar(comment.User)}
+                                        </div>
+                                    )}
+                                    <div style={{ flex: 1 }}>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                marginBottom: '5px',
+                                            }}
+                                        >
+                                            <span
+                                                style={{
+                                                    fontWeight: 'bold',
+                                                    fontSize: '14px',
+                                                    marginRight: '8px',
+                                                }}
+                                            >
+                                                {comment.User?.username ||
+                                                    'Неизвестный'}
+                                            </span>
+                                            <span
+                                                style={{
+                                                    fontSize: '12px',
+                                                    color: '#657786',
+                                                }}
+                                            >
+                                                {new Date(
+                                                    comment.createdAt
+                                                ).toLocaleString('ru-RU')}
+                                            </span>
+                                        </div>
+                                        <p
+                                            style={{
+                                                margin: 0,
+                                                fontSize: '14px',
+                                                lineHeight: '1.4',
+                                            }}
+                                        >
+                                            {comment.comment}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div
+                        style={{
+                            textAlign: 'center',
+                            padding: '20px',
+                            color: '#657786',
+                        }}
+                    >
+                        Пока нет комментариев. Будьте первым!
+                    </div>
+                )}
+            </div>
+        );
     };
 
     const renderAvatar = (user: any) => {
@@ -421,9 +672,51 @@ const HomeFeed: React.FC = () => {
                                         {/* ← СЧЕТЧИК НА КНОПКЕ */}
                                     </span>
                                 </button>
-                            </div>
 
-                            {/* Модальное окно для просмотра изображения */}
+                                <button
+                                    onClick={() => toggleComments(post.id)}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px',
+                                        padding: '8px 16px',
+                                        border: 'none',
+                                        borderRadius: '20px',
+                                        backgroundColor: post.showComments
+                                            ? '#1da1f2'
+                                            : '#f7f9fa',
+                                        color: post.showComments
+                                            ? 'white'
+                                            : '#657786',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        fontSize: '14px',
+                                        fontWeight: 'bold',
+                                    }}
+                                >
+                                    <span style={{ fontSize: '18px' }}>💬</span>
+                                    <span>
+                                        Комментарии{' '}
+                                        {post.comments
+                                            ? `(${post.comments.length})`
+                                            : ''}
+                                    </span>
+                                </button>
+                            </div>
+                            {/* БЛОК КОММЕНТАРИЕВ */}
+                            {renderComments(post)}
+
+                            {/* Время создания */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px',
+                                    color: '#657786',
+                                    fontSize: '14px',
+                                }}
+                            ></div>
+
                             {expandedImage && (
                                 <div
                                     style={{

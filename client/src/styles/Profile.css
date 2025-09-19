@@ -277,6 +277,66 @@ profile-tabs {
     color: white;
 }
 
+.subscribe-btn {
+    transition: all 0.2s ease;
+}
+
+.subscribe-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(29, 161, 242, 0.3);
+}
+
+.subscribe-btn.unsubscribe:hover:not(:disabled) {
+    background-color: #ffebe8 !important;
+    color: #e0245e !important;
+    box-shadow: 0 2px 8px rgba(224, 36, 94, 0.3);
+}
+
+.subscribe-btn-small {
+    transition: all 0.1s ease;
+}
+
+.subscribe-btn-small:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+/* Анимация загрузки */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.subscribe-btn:disabled,
+.subscribe-btn-small:disabled {
+    animation: pulse 1.5s infinite;
+}
+
+.user-card {
+    text-align: center; /* Центрируем содержимое карточки */
+}
+
+.username {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.user-info {
+    text-align: left; /* Инфо оставляем слева */
+}
+
+/* Центрируем кнопку подписки */
+.subscribe-container {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+}
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
     .profile-layout {

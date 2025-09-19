@@ -1,17 +1,13 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../database/sequelize.js';
-import User from './User.js';
+import User from './Users.js';
 
 const Subscription = sequelize.define(
     'Subscription',
     {
-        id: {
-            type: DataTypes.INTEGER,
-            primaryKey: true,
-            autoIncrement: true,
-        },
         followerId: {
             type: DataTypes.INTEGER,
+            primaryKey: true,
             allowNull: false,
             references: {
                 model: User,
@@ -20,6 +16,7 @@ const Subscription = sequelize.define(
         },
         followingId: {
             type: DataTypes.INTEGER,
+            primaryKey: true,
             allowNull: false,
             references: {
                 model: User,
@@ -28,7 +25,7 @@ const Subscription = sequelize.define(
         },
     },
     {
-        tableName: 'user_followers', // ← Именно так как в ассоциациях!
+        tableName: 'user_followers',
         timestamps: true,
         indexes: [
             {
@@ -44,5 +41,7 @@ const Subscription = sequelize.define(
         ],
     }
 );
+
+Subscription.removeAttribute('id');
 
 export default Subscription;

@@ -28,7 +28,7 @@ export const getProfile = async (req, res) => {
         }
 
         res.status(200).json({
-            message: '✅ User profile retrieved successfully',
+            message: 'User profile retrieved successfully',
             user: {
                 id: user.id,
                 username: user.username,
@@ -53,9 +53,6 @@ export const updateProfile = async (req, res) => {
 
         const { username, info, birthdate } = req.body;
         let avatarPath = undefined;
-
-        console.log('📦 Received form data:', { username, info, birthdate });
-        console.log('📁 Files:', req.files);
 
         const user = await User.findByPk(userId);
         if (!user) {
@@ -104,7 +101,7 @@ export const updateProfile = async (req, res) => {
         }
 
         res.status(200).json({
-            message: '✅ User profile updated successfully',
+            message: 'User profile updated successfully',
             user: {
                 id: user.id,
                 username: user.username,
@@ -116,7 +113,7 @@ export const updateProfile = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('❌ Update profile error:', error);
+        console.error('Update profile error:', error);
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({ error: 'Username already exists' });
         }

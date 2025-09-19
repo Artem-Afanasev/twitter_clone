@@ -24,19 +24,16 @@ export const makePostfunc = async (req, res) => {
                 .json({ error: 'Твит не может превышать 280 символов' });
         }
 
-        // Создаем твит
         const tweet = await Post.create({
             content: content.trim(),
             userId: userId,
         });
 
-        // Обработка множественных изображений
         const imagePaths = [];
 
         if (req.files) {
             let images = [];
 
-            // express-fileupload по-разному обрабатывает один и несколько файлов
             if (Array.isArray(req.files.images)) {
                 images = req.files.images;
             } else if (req.files.images) {
@@ -77,11 +74,9 @@ export const makePostfunc = async (req, res) => {
                 }_${Date.now()}_${i}${fileExtension}`;
                 const filePath = path.join(uploadDir, fileName);
 
-                // Сохраняем файл
                 await image.mv(filePath);
                 const imagePath = `/uploads/posts/${fileName}`;
 
-                // Сохраняем изображение в БД
                 await PostImage.create({
                     imageUrl: imagePath,
                     tweetId: tweet.id,
@@ -91,7 +86,6 @@ export const makePostfunc = async (req, res) => {
                 imagePaths.push(imagePath);
             }
         }
-        // Находим пользователя и изображения
         const user = await User.findByPk(userId, {
             attributes: ['id', 'username', 'email', 'avatar'],
         });
@@ -101,7 +95,6 @@ export const makePostfunc = async (req, res) => {
             order: [['order', 'ASC']],
         });
 
-        // Форматируем URL
         let userAvatar = user.avatar;
         if (userAvatar && !userAvatar.startsWith('http')) {
             userAvatar = `http://localhost:5000${userAvatar}`;
@@ -116,7 +109,7 @@ export const makePostfunc = async (req, res) => {
         });
 
         res.status(201).json({
-            message: '✅ Твит успешно создан',
+            message: 'Твит успешно создан',
             tweet: {
                 id: tweet.id,
                 content: tweet.content,

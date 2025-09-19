@@ -1,10 +1,12 @@
 // pages/Profile.tsx
 import React, { useState, useEffect } from 'react';
-import { profileAPI, User } from '../services/api';
+import { profileAPI, User, subscriptionAPI } from '../services/api';
 import CreatePost from '../components/CreatePost';
 import UserPosts from '../components/UserPosts';
 import LikedPosts from '../components/LikedPosts';
+import SubscriptionStats from '../components/SubscriptionStats';
 import '../styles/Profile.css';
+import FollowingPosts from '../components/FollowingPosts';
 
 // Создаем расширенный интерфейс с новыми полями
 interface UserWithProfile extends User {
@@ -14,10 +16,14 @@ interface UserWithProfile extends User {
 }
 
 // Тип для вкладок
-type ProfileTab = 'posts' | 'liked';
+type ProfileTab = 'posts' | 'liked' | 'following';
 
 const Profile: React.FC = () => {
     const [user, setUser] = useState<UserWithProfile | null>(null);
+    const [subscriptionStats, setSubscriptionStats] = useState({
+        followersCount: 0,
+        followingCount: 0,
+    });
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -51,6 +57,10 @@ const Profile: React.FC = () => {
                     ? userData.birthdate.split('T')[0]
                     : '',
             });
+            const statsResponse = await subscriptionAPI.getSubscriptionStats(
+                userData.id
+            );
+            setSubscriptionStats(statsResponse);
         } catch (error: any) {
             console.error('❌ Profile fetch error:', error);
             setMessage(
@@ -198,6 +208,20 @@ const Profile: React.FC = () => {
                         </div>
 
                         <h2 className="username">@{user?.username}</h2>
+
+                        <div style={{ marginBottom: '15px' }}>
+                            <SubscriptionStats
+                                userId={user?.id || 0}
+                                onFollowersClick={() =>
+                                    console.log('Show my followers modal')
+                                }
+                                onFollowingClick={() =>
+                                    console.log('Show my following modal')
+                                }
+                                showFollowing={true} // Показываем подписки
+                                isCurrentUser={true} // Это текущий пользователь
+                            />
+                        </div>
 
                         <div className="user-info">
                             {/* Дата рождения и возраст */}
@@ -412,11 +436,19 @@ const Profile: React.FC = () => {
                         </button>
                         <button
                             className={`tab-button ${
+                                activeTab === 'following' ? 'active' : ''
+                            }`}
+                            onClick={() => setActiveTab('following')}
+                        >
+                            👥 Подписки
+                        </button>
+                        <button
+                            className={`tab-button ${
                                 activeTab === 'liked' ? 'active' : ''
                             }`}
                             onClick={() => setActiveTab('liked')}
                         >
-                            ❤️ Лайкнутые посты
+                            ❤️ Лайкнутые
                         </button>
                     </div>
 
@@ -424,7 +456,9 @@ const Profile: React.FC = () => {
                     {activeTab === 'posts' && <CreatePost />}
 
                     {/* Контент в зависимости от активной вкладки */}
-                    {activeTab === 'posts' ? <UserPosts /> : <LikedPosts />}
+                    {activeTab === 'posts' && <UserPosts />}
+                    {activeTab === 'following' && <FollowingPosts />}
+                    {activeTab === 'liked' && <LikedPosts />}
                 </div>
             </div>
 

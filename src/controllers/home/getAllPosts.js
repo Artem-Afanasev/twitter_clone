@@ -22,20 +22,11 @@ export const getAllPosts = async (req, res) => {
             limit: 100,
         });
 
-        console.log('📊 Найдено постов:', posts.length); // Добавим отладку
+        console.log('Найдено постов:', posts.length);
 
         const formattedPosts = posts.map((post) => {
             const postData = post.toJSON();
 
-            // Отладочная информация
-            console.log(`📝 Пост ${postData.id}:`, {
-                content: postData.content,
-                user: postData.user?.username,
-                imagesCount: postData.images?.length,
-                images: postData.images,
-            });
-
-            // Форматируем аватар
             if (
                 postData.user &&
                 postData.user.avatar &&
@@ -44,7 +35,6 @@ export const getAllPosts = async (req, res) => {
                 postData.user.avatar = `http://localhost:5000${postData.user.avatar}`;
             }
 
-            // Форматируем изображения поста
             if (postData.images && postData.images.length > 0) {
                 postData.images = postData.images.map((img) => {
                     let url = img.imageUrl;
@@ -53,11 +43,6 @@ export const getAllPosts = async (req, res) => {
                     }
                     return url;
                 });
-
-                console.log(
-                    '🖼️ Отформатированные изображения:',
-                    postData.images
-                );
             }
 
             return postData;
@@ -65,7 +50,7 @@ export const getAllPosts = async (req, res) => {
 
         res.json(formattedPosts);
     } catch (error) {
-        console.error('❌ Ошибка при загрузке ленты:', error);
+        console.error('Ошибка при загрузке ленты:', error);
         res.status(500).json({ error: 'Ошибка при загрузке ленты' });
     }
 };

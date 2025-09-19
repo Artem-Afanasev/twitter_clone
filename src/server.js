@@ -10,19 +10,14 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
     try {
         await sequelize.authenticate();
-        console.log('✅ Database connection established');
 
         await sequelize.sync({ force: false });
-        console.log('✅ Database synced');
 
         app.listen(PORT, () => {
-            console.log(`🚀 Server running on port ${PORT}`);
-            console.log(
-                `📁 Static files available at: http://localhost:${PORT}/uploads`
-            );
+            console.log(`Server running, port ${PORT}`);
         });
     } catch (error) {
-        console.error('❌ Failed to start server:', error);
+        console.error('Error', error);
         process.exit(1);
     }
 };

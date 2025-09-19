@@ -46,6 +46,21 @@ export interface CreateTweetResponse {
     tweet: Tweet;
 }
 
+export interface Comment {
+    id: number;
+    comment: string;
+    userId: number;
+    tweetId: number;
+    createdAt: string;
+    updatedAt: string;
+    User?: User;
+}
+
+export interface CreateCommentResponse {
+    message: string;
+    comment: Comment;
+}
+
 export interface LikeResponse {
     message: string;
     likeCount: number;
@@ -165,6 +180,96 @@ export const authAPI = {
         const response = await api.post<AuthResponse>( // ← Используем api вместо axios
             '/auth/login', // ← Только путь, без полного URL
             { email, password }
+        );
+        return response.data;
+    },
+};
+
+export const subscriptionAPI = {
+    getFollowingPosts: async (
+        page: number = 1,
+        limit: number = 20
+    ): Promise<{
+        posts: any[];
+        totalCount: number;
+        totalPages: number;
+        currentPage: number;
+    }> => {
+        const response = await api.get(
+            `/subscriptions/following-posts?page=${page}&limit=${limit}`
+        );
+        return response.data;
+    },
+    // Подписаться на пользователя
+    subscribe: async (
+        targetUserId: number
+    ): Promise<{ message: string; subscription: any }> => {
+        const response = await api.post('/subscriptions/subscribe', {
+            targetUserId,
+        });
+        return response.data;
+    },
+
+    // Отписаться от пользователя
+    unsubscribe: async (targetUserId: number): Promise<{ message: string }> => {
+        const response = await api.post('/subscriptions/unsubscribe', {
+            targetUserId,
+        });
+        return response.data;
+    },
+
+    // Проверить подписку
+    checkSubscription: async (
+        targetUserId: number
+    ): Promise<{ subscribed: boolean }> => {
+        const response = await api.get(`/subscriptions/check/${targetUserId}`);
+        return response.data;
+    },
+
+    // Получить подписчиков
+    getFollowers: async (userId?: number): Promise<{ followers: any[] }> => {
+        const url = userId
+            ? `/subscriptions/followers/${userId}`
+            : '/subscriptions/followers';
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    // Получить подписки
+    getFollowing: async (userId?: number): Promise<{ following: any[] }> => {
+        const url = userId
+            ? `/subscriptions/following/${userId}`
+            : '/subscriptions/following';
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    // Получить статистику подписок
+    getSubscriptionStats: async (
+        userId: number
+    ): Promise<{ followersCount: number; followingCount: number }> => {
+        const response = await api.get(`/subscriptions/stats/${userId}`);
+        return response.data;
+    },
+};
+
+export const commentAPI = {
+    // Получить комментарии для твита
+    getComments: async (tweetId: number): Promise<Comment[]> => {
+        const response = await api.get<Comment[]>(`/comments/${tweetId}`);
+        return response.data;
+    },
+
+    // Создать комментарий
+    createComment: async (
+        tweetId: number,
+        comment: string
+    ): Promise<CreateCommentResponse> => {
+        const response = await api.post<CreateCommentResponse>(
+            `/comments/${tweetId}`,
+            {
+                comment,
+            }
         );
         return response.data;
     },

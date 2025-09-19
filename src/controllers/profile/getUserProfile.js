@@ -5,17 +5,13 @@ export const getUserProfile = async (req, res) => {
         const userId = req.params.id;
         const currentUserId = req.userId;
 
-        console.log(
-            `🔄 Получение профиля пользователя ${userId} для пользователя ${currentUserId}`
-        );
-
         const user = await User.findByPk(userId, {
             attributes: ['id', 'username', 'avatar', 'info', 'birthdate'],
             raw: true,
         });
 
         if (!user) {
-            console.log('❌ Пользователь не найден');
+            console.log('Пользователь не найден');
             return res.status(404).json({ error: 'Пользователь не найден' });
         }
 
@@ -35,8 +31,6 @@ export const getUserProfile = async (req, res) => {
             ],
             order: [['createdAt', 'DESC']],
         });
-
-        console.log(`✅ Найдено постов пользователя: ${userPosts.length}`);
 
         const userLikes = await Like.findAll({
             where: {
@@ -107,13 +101,9 @@ export const getUserProfile = async (req, res) => {
             },
             posts: formattedPosts,
         };
-
-        console.log(
-            `✅ Профиль пользователя ${user.username} успешно загружен`
-        );
         res.json(response);
     } catch (error) {
-        console.error('❌ Ошибка при получении профиля пользователя:', error);
+        console.error('Ошибка при получении профиля пользователя:', error);
         res.status(500).json({ error: 'Ошибка при загрузке профиля' });
     }
 };
