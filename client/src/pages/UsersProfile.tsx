@@ -1,4 +1,3 @@
-// pages/UserProfile.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { profileAPI, tweetAPI, subscriptionAPI } from '../services/api';
@@ -57,7 +56,7 @@ const UserProfile: React.FC = () => {
                 const response = await profileAPI.getUserProfile(
                     Number(userId)
                 );
-                console.log('📦 Данные с бэкенда:', response);
+                console.log('Данные с бэкенда:', response);
 
                 setUser(response.user);
                 setPosts(response.posts || []);
@@ -177,7 +176,6 @@ const UserProfile: React.FC = () => {
     return (
         <div className="profile-container">
             <div className="profile-layout">
-                {/* Левая колонка - информация о пользователе */}
                 <div className="profile-sidebar">
                     <div className="user-card">
                         <div className="user-avatar">
@@ -206,12 +204,11 @@ const UserProfile: React.FC = () => {
                                 onFollowersClick={() =>
                                     console.log('Show followers modal')
                                 }
-                                showFollowing={false} // Скрываем подписки у других пользователей
-                                isCurrentUser={false} // Это не текущий пользователь
+                                showFollowing={false}
+                                isCurrentUser={false}
                             />
                         </div>
 
-                        {/* Кнопка подписки */}
                         <div
                             className="subscribe-container"
                             style={{ marginBottom: '20px' }}
@@ -230,11 +227,10 @@ const UserProfile: React.FC = () => {
                         </div>
 
                         <div className="user-info">
-                            {/* Дата рождения */}
                             {user.birthdate && (
                                 <div className="info-item">
                                     <span className="label">
-                                        🎂 Дата рождения:
+                                        Дата рождения:
                                     </span>
                                     <span className="value">
                                         {formatBirthdate(user.birthdate)}
@@ -253,7 +249,6 @@ const UserProfile: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Описание профиля */}
                             {user.info && (
                                 <div
                                     className="info-item"
@@ -266,7 +261,7 @@ const UserProfile: React.FC = () => {
                                         className="label"
                                         style={{ marginBottom: '5px' }}
                                     >
-                                        📝 О себе:
+                                        О себе:
                                     </span>
                                     <span
                                         className="value"
@@ -281,12 +276,9 @@ const UserProfile: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Дата регистрации */}
                             {user.createdAt && (
                                 <div className="info-item">
-                                    <span className="label">
-                                        📅 Регистрация:
-                                    </span>
+                                    <span className="label">Регистрация:</span>
                                     <span className="value">
                                         {new Date(
                                             user.createdAt
@@ -295,9 +287,8 @@ const UserProfile: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Количество постов */}
                             <div className="info-item">
-                                <span className="label">📝 Постов:</span>
+                                <span className="label"> Постов:</span>
                                 <span className="value">{posts.length}</span>
                             </div>
                         </div>
@@ -308,7 +299,6 @@ const UserProfile: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Правая колонка - посты пользователя */}
                 <div className="profile-content">
                     <h3
                         style={{
@@ -338,9 +328,7 @@ const UserProfile: React.FC = () => {
                                     fontSize: '48px',
                                     marginBottom: '15px',
                                 }}
-                            >
-                                🌅
-                            </div>
+                            ></div>
                             <h3
                                 style={{
                                     margin: '0 0 10px 0',
@@ -372,7 +360,6 @@ const UserProfile: React.FC = () => {
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                                     }}
                                 >
-                                    {/* Шапка поста */}
                                     <div
                                         style={{
                                             display: 'flex',
@@ -381,7 +368,6 @@ const UserProfile: React.FC = () => {
                                             gap: '12px',
                                         }}
                                     >
-                                        {/* Аватар пользователя */}
                                         {user.avatar ? (
                                             <img
                                                 src={user.avatar}
@@ -464,7 +450,6 @@ const UserProfile: React.FC = () => {
                                         </div>
                                     </div>
 
-                                    {/* Содержание поста */}
                                     <div
                                         style={{
                                             margin: '0 0 16px 0',
@@ -477,7 +462,6 @@ const UserProfile: React.FC = () => {
                                         {post.content}
                                     </div>
 
-                                    {/* Блок изображений */}
                                     {post.images && post.images.length > 0 && (
                                         <div
                                             style={{
@@ -551,7 +535,6 @@ const UserProfile: React.FC = () => {
                                         </div>
                                     )}
 
-                                    {/* Кнопка лайка */}
                                     <div
                                         style={{
                                             display: 'flex',
@@ -612,7 +595,6 @@ const UserProfile: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Модальное окно для просмотра изображения */}
                     {expandedImage && (
                         <div
                             style={{

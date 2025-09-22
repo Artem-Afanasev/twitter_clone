@@ -1,4 +1,3 @@
-/* Profile.css */
 .profile-container {
     padding: 20px;
     max-width: 1200px;
@@ -17,7 +16,7 @@
     width: 100px;
     height: 100px;
     border-radius: 50%;
-    overflow: hidden; /* Это ОЧЕНЬ важно - обрезает все что выходит за круг */
+    overflow: hidden;
     border: 3px solid #1da1f2;
     background-color: #f0f0f0;
     display: flex;
@@ -29,7 +28,7 @@
 .avatar-image {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Это растягивает изображение чтобы заполнить круг */
+    object-fit: cover;
     display: block;
 }
 
@@ -69,7 +68,7 @@
     align-items: center;
     justify-content: center;
     margin: 0 auto 15px;
-    overflow: hidden; /* Важно для обрезки изображений */
+    overflow: hidden;
 }
 
 .username {
@@ -139,7 +138,7 @@
 }
 
 .profile-content {
-    min-width: 0; /* Для правильного отображения grid */
+    min-width: 0;
 }
 
 .edit-form {
@@ -300,7 +299,6 @@ profile-tabs {
     transform: translateY(-1px);
 }
 
-/* Анимация загрузки */
 @keyframes pulse {
     0% {
         opacity: 1;
@@ -319,7 +317,7 @@ profile-tabs {
 }
 
 .user-card {
-    text-align: center; /* Центрируем содержимое карточки */
+    text-align: center;
 }
 
 .username {
@@ -328,16 +326,15 @@ profile-tabs {
 }
 
 .user-info {
-    text-align: left; /* Инфо оставляем слева */
+    text-align: left;
 }
 
-/* Центрируем кнопку подписки */
 .subscribe-container {
     display: flex;
     justify-content: center;
     margin: 15px 0;
 }
-/* Адаптивность для мобильных устройств */
+
 @media (max-width: 768px) {
     .profile-layout {
         grid-template-columns: 1fr;

@@ -17,16 +17,15 @@ const LikedPosts: React.FC = () => {
             try {
                 setLoading(true);
                 setError('');
-                console.log('🔄 Загрузка лайкнутых постов...');
+                console.log(' Загрузка лайкнутых постов...');
 
                 const likedPosts = await tweetAPI.getUserLikedTweets();
-                console.log('✅ Ответ от сервера:', likedPosts);
+                console.log(' Ответ от сервера:', likedPosts);
 
-                // Проверьте структуру первого поста
                 if (likedPosts.length > 0) {
-                    console.log('📦 Структура первого поста:', likedPosts[0]);
+                    console.log(' Структура первого поста:', likedPosts[0]);
                     console.log(
-                        '🖼️ Изображения первого поста:',
+                        ' Изображения первого поста:',
                         likedPosts[0].images
                     );
                 }
@@ -46,8 +45,8 @@ const LikedPosts: React.FC = () => {
             }
         };
 
-        fetchLikedPosts(); // ← ВЫЗОВИТЕ ФУНКЦИЮ ЗДЕСЬ!
-    }, []); // ← Уберите posts.length из зависимостей
+        fetchLikedPosts();
+    }, []);
 
     if (loading) {
         return (
@@ -128,7 +127,6 @@ const LikedPosts: React.FC = () => {
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                             }}
                         >
-                            {/* Шапка поста */}
                             <div
                                 style={{
                                     display: 'flex',
@@ -189,7 +187,6 @@ const LikedPosts: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Содержание */}
                             <div
                                 style={{
                                     marginBottom: '15px',
@@ -248,7 +245,6 @@ const LikedPosts: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Время и лайки */}
                             <div
                                 style={{
                                     display: 'flex',

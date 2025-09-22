@@ -1,4 +1,3 @@
-// components/HomeFeed.tsx
 import React, { useState, useEffect } from 'react';
 import { tweetAPI, Tweet, commentAPI, Comment } from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -23,10 +22,10 @@ const HomeFeed: React.FC = () => {
         try {
             setLoading(true);
             setError('');
-            console.log('🔄 Загрузка ленты...');
+            console.log(' Загрузка ленты...');
 
             const allPosts = await tweetAPI.getAllTweets();
-            console.log('✅ Получено постов:', allPosts.length);
+            console.log(' Получено постов:', allPosts.length);
 
             const postsWithLikes = await Promise.all(
                 allPosts.map(async (post: any) => {
@@ -38,10 +37,10 @@ const HomeFeed: React.FC = () => {
 
                         return {
                             ...post,
-                            likesCount: likesInfo.likeCount || 0, // ← ИСПРАВЛЕНО: используем актуальное количество
+                            likesCount: likesInfo.likeCount || 0,
                             isLiked: likeStatus.liked,
-                            showComments: false, // По умолчанию скрываем комментарии
-                            comments: [], // Пустой массив комментариев
+                            showComments: false,
+                            comments: [],
                             commentsLoading: false,
                         };
                     } catch (error) {
@@ -61,7 +60,7 @@ const HomeFeed: React.FC = () => {
                 })
             );
 
-            console.log('📦 Посты с информацией о лайках:', postsWithLikes);
+            console.log(' Посты с информацией о лайках:', postsWithLikes);
             setPosts(postsWithLikes);
         } catch (err: any) {
             console.error('❌ Ошибка загрузки ленты:', err);
@@ -83,14 +82,11 @@ const HomeFeed: React.FC = () => {
             let response: { likeCount: number; message: string };
 
             if (currentlyLiked) {
-                // Убираем лайк
                 response = await tweetAPI.unlikeTweet(postId);
             } else {
-                // Ставим лайк
                 response = await tweetAPI.likeTweet(postId);
             }
 
-            // Обновляем состояние поста
             setPosts((prevPosts) =>
                 prevPosts.map((post) =>
                     post.id === postId
@@ -104,7 +100,6 @@ const HomeFeed: React.FC = () => {
             );
         } catch (error) {
             console.error('❌ Ошибка при лайке:', error);
-            // Можно добавить уведомление пользователю
         }
     };
 
@@ -142,7 +137,6 @@ const HomeFeed: React.FC = () => {
                 if (post.id === postId) {
                     const newShowComments = !post.showComments;
 
-                    // Если показываем комментарии и они еще не загружены - загружаем
                     if (newShowComments && post.comments?.length === 0) {
                         loadComments(postId);
                     }
@@ -163,7 +157,6 @@ const HomeFeed: React.FC = () => {
                 commentText.trim()
             );
 
-            // Добавляем новый комментарий в список
             setPosts((prevPosts) =>
                 prevPosts.map((post) =>
                     post.id === postId
@@ -173,13 +166,13 @@ const HomeFeed: React.FC = () => {
                                   response.comment,
                                   ...(post.comments || []),
                               ],
-                              showComments: true, // Показываем комментарии после отправки
+                              showComments: true,
                           }
                         : post
                 )
             );
 
-            setCommentText(''); // Очищаем поле ввода
+            setCommentText('');
         } catch (error) {
             console.error('❌ Ошибка отправки комментария:', error);
             alert('Ошибка при отправке комментария');
@@ -198,7 +191,6 @@ const HomeFeed: React.FC = () => {
                     border: '1px solid #e1e8ed',
                 }}
             >
-                {/* Форма для нового комментария */}
                 <div style={{ marginBottom: '20px' }}>
                     <textarea
                         value={commentText}
@@ -256,7 +248,6 @@ const HomeFeed: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Список комментариев */}
                 {post.commentsLoading ? (
                     <div
                         style={{
@@ -366,7 +357,7 @@ const HomeFeed: React.FC = () => {
                         fontWeight: 'bold',
                         fontSize: '18px',
                         flexShrink: 0,
-                        cursor: 'pointer', // Добавьте курсор
+                        cursor: 'pointer',
                     }}
                     onClick={() => user?.id && handleUserClick(user.id)}
                 >
@@ -386,7 +377,7 @@ const HomeFeed: React.FC = () => {
                         borderRadius: '50%',
                         objectFit: 'cover',
                         border: '2px solid #1da1f2',
-                        cursor: 'pointer', // Добавьте курсор
+                        cursor: 'pointer',
                     }}
                     onClick={() => handleUserClick(user.id)}
                     onError={(e) => {
@@ -410,7 +401,7 @@ const HomeFeed: React.FC = () => {
                     fontWeight: 'bold',
                     fontSize: '18px',
                     flexShrink: 0,
-                    cursor: 'pointer', // Добавьте курсор
+                    cursor: 'pointer',
                 }}
                 onClick={() => handleUserClick(user.id)}
             >
@@ -429,7 +420,7 @@ const HomeFeed: React.FC = () => {
                     fontSize: '18px',
                 }}
             >
-                📡 Загрузка ленты...
+                Загрузка ленты...
             </div>
         );
     }
@@ -473,9 +464,9 @@ const HomeFeed: React.FC = () => {
                         margin: '20px 0',
                     }}
                 >
-                    <div style={{ fontSize: '48px', marginBottom: '15px' }}>
-                        🌅
-                    </div>
+                    <div
+                        style={{ fontSize: '48px', marginBottom: '15px' }}
+                    ></div>
                     <h3 style={{ margin: '0 0 10px 0', color: '#14171a' }}>
                         Лента пуста
                     </h3>
@@ -510,14 +501,13 @@ const HomeFeed: React.FC = () => {
                                 e.currentTarget.style.transform = 'none';
                             }}
                         >
-                            {/* Шапка поста с автором */}
                             <div
                                 style={{
                                     display: 'flex',
                                     alignItems: 'center',
                                     marginBottom: '15px',
                                     gap: '12px',
-                                    justifyContent: 'flex-start', // выравниваем по левому краю
+                                    justifyContent: 'flex-start',
                                     width: '100%',
                                 }}
                             >
@@ -536,8 +526,8 @@ const HomeFeed: React.FC = () => {
                                             color: '#14171a',
                                             fontSize: '16px',
                                             marginRight: '12px',
-                                            cursor: 'pointer', // Добавьте курсор
-                                            textDecoration: 'underline', // Подчеркивание для интерактивности
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
                                         }}
                                         onClick={() =>
                                             post.user?.id &&
@@ -550,7 +540,6 @@ const HomeFeed: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Содержание твита */}
                             <div
                                 style={{
                                     margin: '0 0 20px 0',
@@ -563,7 +552,6 @@ const HomeFeed: React.FC = () => {
                                 {post.content}
                             </div>
 
-                            {/* БЛОК ИЗОБРАЖЕНИЙ */}
                             {post.images && post.images.length > 0 && (
                                 <div
                                     style={{
@@ -624,7 +612,6 @@ const HomeFeed: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* КНОПКА ЛАЙКА И СЧЕТЧИК */}
                             <div
                                 style={{
                                     display: 'flex',
@@ -669,7 +656,6 @@ const HomeFeed: React.FC = () => {
                                     </span>
                                     <span style={{ fontWeight: 'bold' }}>
                                         {post.likesCount}{' '}
-                                        {/* ← СЧЕТЧИК НА КНОПКЕ */}
                                     </span>
                                 </button>
 
@@ -703,10 +689,8 @@ const HomeFeed: React.FC = () => {
                                     </span>
                                 </button>
                             </div>
-                            {/* БЛОК КОММЕНТАРИЕВ */}
                             {renderComments(post)}
 
-                            {/* Время создания */}
                             <div
                                 style={{
                                     display: 'flex',
@@ -747,7 +731,6 @@ const HomeFeed: React.FC = () => {
                                 </div>
                             )}
 
-                            {/* Время создания */}
                             <div
                                 style={{
                                     display: 'flex',
@@ -757,7 +740,7 @@ const HomeFeed: React.FC = () => {
                                     fontSize: '14px',
                                 }}
                             >
-                                <span>📅</span>
+                                <span></span>
                                 <span>
                                     {new Date(post.createdAt).toLocaleString(
                                         'ru-RU',

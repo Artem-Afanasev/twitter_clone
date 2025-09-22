@@ -1,4 +1,3 @@
-// components/FollowingPosts.tsx
 import React, { useState, useEffect } from 'react';
 import { subscriptionAPI, tweetAPI } from '../services/api';
 
@@ -143,7 +142,6 @@ const FollowingPosts: React.FC = () => {
                             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
                         }}
                     >
-                        {/* Шапка поста */}
                         <div
                             style={{
                                 display: 'flex',
@@ -152,7 +150,6 @@ const FollowingPosts: React.FC = () => {
                                 gap: '12px',
                             }}
                         >
-                            {/* Аватар пользователя */}
                             {post.user.avatar ? (
                                 <img
                                     src={post.user.avatar}
@@ -234,7 +231,6 @@ const FollowingPosts: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Содержание поста */}
                         <div
                             style={{
                                 margin: '0 0 16px 0',
@@ -247,7 +243,6 @@ const FollowingPosts: React.FC = () => {
                             {post.content}
                         </div>
 
-                        {/* Блок изображений */}
                         {post.images && post.images.length > 0 && (
                             <div
                                 style={{
@@ -307,7 +302,6 @@ const FollowingPosts: React.FC = () => {
                             </div>
                         )}
 
-                        {/* Кнопка лайка */}
                         <div
                             style={{
                                 display: 'flex',
@@ -356,7 +350,6 @@ const FollowingPosts: React.FC = () => {
                 ))}
             </div>
 
-            {/* Пагинация */}
             {totalPages > 1 && (
                 <div
                     style={{
@@ -415,7 +408,6 @@ const FollowingPosts: React.FC = () => {
                 </div>
             )}
 
-            {/* Модальное окно для просмотра изображения */}
             {expandedImage && (
                 <div
                     style={{

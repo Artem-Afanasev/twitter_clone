@@ -1,4 +1,3 @@
-// components/CreatePost.tsx
 import React, { useState, useRef } from 'react';
 import { api } from '../services/api';
 
@@ -35,7 +34,6 @@ const CreatePost: React.FC = () => {
             const formData = new FormData();
             formData.append('content', content);
 
-            // Добавляем все изображения
             selectedImages.forEach((image, index) => {
                 formData.append('images', image);
             });
@@ -44,7 +42,6 @@ const CreatePost: React.FC = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
-            // Сброс формы
             setContent('');
             setSelectedImages([]);
             setImagePreviews([]);
@@ -53,9 +50,7 @@ const CreatePost: React.FC = () => {
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
-        } catch (error: any) {
-            // обработка ошибок
-        }
+        } catch (error: any) {}
     };
 
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -147,7 +142,6 @@ const CreatePost: React.FC = () => {
                     disabled={status === 'loading'}
                 />
 
-                {/* Превью изображения */}
                 {imagePreviews.map((preview, index) => (
                     <div
                         key={index}
@@ -184,7 +178,6 @@ const CreatePost: React.FC = () => {
                     </div>
                 ))}
 
-                {/* Кнопка выбора файла */}
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         ref={fileInputRef}

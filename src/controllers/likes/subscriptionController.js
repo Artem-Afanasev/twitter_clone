@@ -56,9 +56,8 @@ export const subscribe = async (req, res) => {
         });
 
         res.status(201).json({
-            message: '✅ Вы успешно подписались на пользователя',
+            message: 'Вы успешно подписались на пользователя',
             subscription: {
-                // Не возвращаем id, так как его нет
                 followerId: subscription.followerId,
                 followingId: subscription.followingId,
                 targetUser: {
@@ -70,7 +69,7 @@ export const subscribe = async (req, res) => {
             },
         });
     } catch (error) {
-        console.error('❌ Ошибка при подписке:', error);
+        console.error('Ошибка при подписке:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при подписке',
         });
@@ -104,10 +103,10 @@ export const unsubscribe = async (req, res) => {
         await subscription.destroy();
 
         res.json({
-            message: '✅ Вы отписались от пользователя',
+            message: ' Вы отписались от пользователя',
         });
     } catch (error) {
-        console.error('❌ Ошибка при отписке:', error);
+        console.error(' Ошибка при отписке:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при отписке',
         });
@@ -120,9 +119,8 @@ export const getFollowingPosts = async (req, res) => {
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
 
-        console.log(`🔄 Получение постов подписок для пользователя ${userId}`);
+        console.log(`Получение постов подписок для пользователя ${userId}`);
 
-        // Получаем ID пользователей, на которых подписан
         const subscriptions = await Subscription.findAll({
             where: { followerId: userId },
             attributes: ['followingId'],
@@ -132,7 +130,7 @@ export const getFollowingPosts = async (req, res) => {
         const followingIds = subscriptions.map((sub) => sub.followingId);
 
         if (followingIds.length === 0) {
-            console.log('✅ Нет подписок');
+            console.log(' Нет подписок');
             return res.json({
                 posts: [],
                 totalCount: 0,
@@ -141,7 +139,6 @@ export const getFollowingPosts = async (req, res) => {
             });
         }
 
-        // Получаем посты пользователей, на которых подписан
         const { count, rows: posts } = await Tweet.findAndCountAll({
             where: {
                 userId: followingIds,
@@ -153,7 +150,7 @@ export const getFollowingPosts = async (req, res) => {
                     attributes: ['id', 'username', 'avatar'],
                 },
                 {
-                    model: PostImage, // Добавляем включение изображений
+                    model: PostImage,
                     as: 'images',
                     attributes: ['imageUrl'],
                 },
@@ -164,18 +161,13 @@ export const getFollowingPosts = async (req, res) => {
             distinct: true,
         });
 
-        console.log(`✅ Найдено постов: ${count}`);
-
-        // Форматируем ответ аналогично getLikedTweets
         const formattedPosts = await Promise.all(
             posts.map(async (post) => {
                 try {
-                    // Получаем количество лайков для поста
                     const likesCount = await Like.count({
                         where: { tweetId: post.id },
                     });
 
-                    // Проверяем, лайкнул ли текущий пользователь этот пост
                     const userLike = await Like.findOne({
                         where: {
                             tweetId: post.id,
@@ -185,7 +177,6 @@ export const getFollowingPosts = async (req, res) => {
 
                     const postData = post.toJSON();
 
-                    // Форматируем аватар пользователя
                     if (
                         postData.user?.avatar &&
                         !postData.user.avatar.startsWith('http')
@@ -193,7 +184,6 @@ export const getFollowingPosts = async (req, res) => {
                         postData.user.avatar = `http://localhost:5000${postData.user.avatar}`;
                     }
 
-                    // Форматируем изображения поста
                     if (postData.images && postData.images.length > 0) {
                         postData.images = postData.images.map((img) => {
                             let url = img.imageUrl;
@@ -206,13 +196,12 @@ export const getFollowingPosts = async (req, res) => {
                         postData.images = [];
                     }
 
-                    // Добавляем информацию о лайках
                     postData.likesCount = likesCount;
                     postData.isLiked = !!userLike;
 
                     return postData;
                 } catch (error) {
-                    console.error(`❌ Ошибка для поста ${post.id}:`, error);
+                    console.error(`Ошибка для поста ${post.id}:`, error);
                     return post.toJSON();
                 }
             })
@@ -225,7 +214,7 @@ export const getFollowingPosts = async (req, res) => {
             currentPage: page,
         });
     } catch (error) {
-        console.error('❌ Ошибка при получении постов подписок:', error);
+        console.error(' Ошибка при получении постов подписок:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при получении постов подписок',
         });
@@ -241,7 +230,6 @@ export const checkSubscription = async (req, res) => {
                 followerId: followerId,
                 followingId: targetUserId,
             },
-            // Явно указываем какие поля выбирать
             attributes: ['followerId', 'followingId', 'createdAt'],
         });
 
@@ -249,7 +237,7 @@ export const checkSubscription = async (req, res) => {
             subscribed: !!subscription,
         });
     } catch (error) {
-        console.error('❌ Ошибка при проверке подписки:', error);
+        console.error(' Ошибка при проверке подписки:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при проверке подписки',
         });
@@ -281,7 +269,7 @@ export const getFollowing = async (req, res) => {
             following: user.following,
         });
     } catch (error) {
-        console.error('❌ Ошибка при получении подписок:', error);
+        console.error(' Ошибка при получении подписок:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при получении подписок',
         });
@@ -313,7 +301,7 @@ export const getFollowers = async (req, res) => {
             followers: user.followers,
         });
     } catch (error) {
-        console.error('❌ Ошибка при получении подписчиков:', error);
+        console.error(' Ошибка при получении подписчиков:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при получении подписчиков',
         });
@@ -334,7 +322,7 @@ export const getSubscriptionStats = async (req, res) => {
             followingCount,
         });
     } catch (error) {
-        console.error('❌ Ошибка при получении статистики:', error);
+        console.error(' Ошибка при получении статистики:', error);
         res.status(500).json({
             error: 'Внутренняя ошибка сервера при получении статистики',
         });

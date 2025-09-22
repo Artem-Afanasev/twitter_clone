@@ -1,4 +1,3 @@
-// components/SubscriptionStats.tsx
 import React, { useState, useEffect } from 'react';
 import { subscriptionAPI } from '../services/api';
 
@@ -6,16 +5,16 @@ interface SubscriptionStatsProps {
     userId: number;
     onFollowersClick?: () => void;
     onFollowingClick?: () => void;
-    showFollowing?: boolean; // Новый проп для отображения подписок
-    isCurrentUser?: boolean; // Новый проп для определения текущего пользователя
+    showFollowing?: boolean;
+    isCurrentUser?: boolean;
 }
 
 const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({
     userId,
     onFollowersClick,
     onFollowingClick,
-    showFollowing = true, // По умолчанию показываем подписки
-    isCurrentUser = false, // По умолчанию не текущий пользователь
+    showFollowing = true,
+    isCurrentUser = false,
 }) => {
     const [stats, setStats] = useState({
         followersCount: 0,
@@ -46,7 +45,7 @@ const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({
                     display: 'flex',
                     gap: '20px',
                     color: '#657786',
-                    justifyContent: 'center', // Центрируем
+                    justifyContent: 'center',
                 }}
             >
                 <span>...</span>
@@ -61,7 +60,7 @@ const SubscriptionStats: React.FC<SubscriptionStatsProps> = ({
                 display: 'flex',
                 gap: '20px',
                 fontSize: '14px',
-                justifyContent: 'center', // Центрируем
+                justifyContent: 'center',
                 alignItems: 'center',
             }}
         >

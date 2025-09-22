@@ -4,8 +4,6 @@ export const getComments = async (req, res) => {
     try {
         const { tweetId } = req.params;
 
-        console.log('🔄 GET Comments - UserId:', req.userId); // для отладки
-
         const tweet = await Tweet.findByPk(tweetId);
         if (!tweet) {
             return res.status(404).json({ error: 'Твит не найден' });
@@ -31,10 +29,6 @@ export const getComments = async (req, res) => {
 
 export const postComment = async (req, res) => {
     try {
-        console.log('🔄 POST Comment - Params:', req.params);
-        console.log('🔄 POST Comment - Body:', req.body);
-        console.log('🔄 POST Comment - User:', req.user);
-
         const { tweetId } = req.params;
         const { comment } = req.body;
         const userId = req.userId;

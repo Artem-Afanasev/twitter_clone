@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { authAPI, AuthResponse } from '../services/api'; // ← добавляем импорт типа
+import { authAPI, AuthResponse } from '../services/api';
 import { Link } from 'react-router-dom';
 
 interface LoginProps {
@@ -17,15 +17,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         e.preventDefault();
         try {
             const response: AuthResponse = await authAPI.login(
-                // ← указываем тип
                 formData.email,
                 formData.password
             );
             onLogin(response.token, response.user);
-            setMessage('✅ Успешный вход!');
+            setMessage(' Успешный вход!');
         } catch (error: any) {
             setMessage(
-                `❌ Ошибка: ${error.response?.data?.error || error.message}`
+                ` Ошибка: ${error.response?.data?.error || error.message}`
             );
         }
     };

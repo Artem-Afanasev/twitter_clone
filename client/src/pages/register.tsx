@@ -7,20 +7,18 @@ const Register: React.FC = () => {
         username: '',
         email: '',
         password: '',
-        confirmPassword: '', // ← Добавляем подтверждение пароля
-        birthdate: '', // ← Добавляем дату рождения
+        confirmPassword: '',
+        birthdate: '',
     });
     const [avatar, setAvatar] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>('');
     const [message, setMessage] = useState('');
-    const [errors, setErrors] = useState<{ [key: string]: string }>({}); // ← Для ошибок валидации
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Функция валидации формы
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
 
-        // Проверка паролей
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Пароли не совпадают';
         }
@@ -29,7 +27,6 @@ const Register: React.FC = () => {
             newErrors.password = 'Пароль должен быть не менее 6 символов';
         }
 
-        // Проверка даты рождения
         if (formData.birthdate) {
             const birthDate = new Date(formData.birthdate);
             const currentDate = new Date();
@@ -37,7 +34,6 @@ const Register: React.FC = () => {
             if (birthDate >= currentDate) {
                 newErrors.birthdate = 'Дата рождения должна быть в прошлом';
             } else {
-                // Проверка возраста (не младше 13 лет)
                 const minAgeDate = new Date();
                 minAgeDate.setFullYear(currentDate.getFullYear() - 13);
 
@@ -45,7 +41,6 @@ const Register: React.FC = () => {
                     newErrors.birthdate = 'Вы должны быть старше 13 лет';
                 }
 
-                // Проверка возраста (не старше 120 лет)
                 const maxAgeDate = new Date();
                 maxAgeDate.setFullYear(currentDate.getFullYear() - 120);
 
@@ -63,7 +58,6 @@ const Register: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Валидация перед отправкой
         if (!validateForm()) {
             setMessage('❌ Пожалуйста, исправьте ошибки в форме');
             return;
@@ -74,7 +68,7 @@ const Register: React.FC = () => {
             formDataToSend.append('username', formData.username);
             formDataToSend.append('email', formData.email);
             formDataToSend.append('password', formData.password);
-            formDataToSend.append('birthdate', formData.birthdate); // ← Добавляем дату рождения
+            formDataToSend.append('birthdate', formData.birthdate);
 
             if (avatar) {
                 formDataToSend.append('avatar', avatar);
@@ -94,9 +88,8 @@ const Register: React.FC = () => {
             }
 
             const data = await response.json();
-            setMessage(`✅ ${data.message}`);
+            setMessage(` ${data.message}`);
 
-            // Очищаем форму после успешной регистрации
             setFormData({
                 username: '',
                 email: '',
@@ -111,7 +104,7 @@ const Register: React.FC = () => {
             }
             setErrors({});
         } catch (error: any) {
-            setMessage(`❌ Ошибка: ${error.message}`);
+            setMessage(` Ошибка: ${error.message}`);
         }
     };
 
@@ -122,7 +115,6 @@ const Register: React.FC = () => {
             [name]: value,
         });
 
-        // Очищаем ошибку при изменении поля
         if (errors[name]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -136,7 +128,7 @@ const Register: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             if (!file.type.startsWith('image/')) {
-                setMessage('❌ Пожалуйста, выберите изображение');
+                setMessage(' Пожалуйста, выберите изображение');
                 return;
             }
 
@@ -167,9 +159,8 @@ const Register: React.FC = () => {
                 paddingTop: '60px',
             }}
         >
-            <h2>📝 Регистрация</h2>
+            <h2>Регистрация</h2>
             <form onSubmit={handleSubmit}>
-                {/* Поле имени пользователя */}
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         type="text"
@@ -196,7 +187,6 @@ const Register: React.FC = () => {
                     )}
                 </div>
 
-                {/* Поле email */}
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         type="email"
@@ -223,7 +213,6 @@ const Register: React.FC = () => {
                     )}
                 </div>
 
-                {/* Поле пароля */}
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         type="password"
@@ -250,7 +239,6 @@ const Register: React.FC = () => {
                     )}
                 </div>
 
-                {/* Подтверждение пароля */}
                 <div style={{ marginBottom: '15px' }}>
                     <input
                         type="password"
@@ -277,7 +265,6 @@ const Register: React.FC = () => {
                     )}
                 </div>
 
-                {/* Поле даты рождения */}
                 <div style={{ marginBottom: '15px' }}>
                     <label
                         style={{
@@ -286,7 +273,7 @@ const Register: React.FC = () => {
                             fontWeight: 'bold',
                         }}
                     >
-                        📅 Дата рождения
+                        Дата рождения
                     </label>
                     <input
                         type="date"
@@ -311,7 +298,6 @@ const Register: React.FC = () => {
                     )}
                 </div>
 
-                {/* Поле аватара */}
                 <div style={{ marginBottom: '15px' }}>
                     <label
                         style={{
@@ -380,7 +366,7 @@ const Register: React.FC = () => {
                         fontSize: '16px',
                     }}
                 >
-                    🚀 Зарегистрироваться
+                    Зарегистрироваться
                 </button>
             </form>
 
@@ -395,7 +381,7 @@ const Register: React.FC = () => {
                             fontWeight: 'bold',
                         }}
                     >
-                        🔑 Войти
+                        Войти
                     </Link>
                 </p>
             </div>

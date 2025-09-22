@@ -1,4 +1,3 @@
-// pages/Profile.tsx
 import React, { useState, useEffect } from 'react';
 import { profileAPI, User, subscriptionAPI } from '../services/api';
 import CreatePost from '../components/CreatePost';
@@ -8,14 +7,12 @@ import SubscriptionStats from '../components/SubscriptionStats';
 import '../styles/Profile.css';
 import FollowingPosts from '../components/FollowingPosts';
 
-// Создаем расширенный интерфейс с новыми полями
 interface UserWithProfile extends User {
     avatar?: string;
     birthdate?: string;
     info?: string;
 }
 
-// Тип для вкладок
 type ProfileTab = 'posts' | 'liked' | 'following';
 
 const Profile: React.FC = () => {
@@ -44,9 +41,9 @@ const Profile: React.FC = () => {
     const fetchProfile = async () => {
         try {
             setLoading(true);
-            console.log('🔄 Fetching profile...');
+            console.log(' Fetching profile...');
             const response = await profileAPI.getProfile();
-            console.log('✅ API Response:', response);
+            console.log(' API Response:', response);
 
             const userData = response.user as UserWithProfile;
             setUser(userData);
@@ -62,9 +59,9 @@ const Profile: React.FC = () => {
             );
             setSubscriptionStats(statsResponse);
         } catch (error: any) {
-            console.error('❌ Profile fetch error:', error);
+            console.error(' Profile fetch error:', error);
             setMessage(
-                `❌ Ошибка: ${error.response?.data?.error || error.message}`
+                ` Ошибка: ${error.response?.data?.error || error.message}`
             );
         } finally {
             setLoading(false);
@@ -96,7 +93,7 @@ const Profile: React.FC = () => {
 
             setUser(updatedUser);
             setEditMode(false);
-            setMessage('✅ Профиль успешно обновлен!');
+            setMessage(' Профиль успешно обновлен!');
 
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
@@ -113,7 +110,7 @@ const Profile: React.FC = () => {
             fetchProfile();
         } catch (error: any) {
             setMessage(
-                `❌ Ошибка: ${error.response?.data?.error || error.message}`
+                ` Ошибка: ${error.response?.data?.error || error.message}`
             );
         }
     };
@@ -133,7 +130,6 @@ const Profile: React.FC = () => {
         window.location.href = '/login';
     };
 
-    // Функция для форматирования даты рождения
     const formatBirthdate = (birthdate: string | undefined) => {
         if (!birthdate) return 'Не указана';
 
@@ -145,7 +141,6 @@ const Profile: React.FC = () => {
         });
     };
 
-    // Функция для вычисления возраста
     const calculateAge = (birthdate: string | undefined) => {
         if (!birthdate) return null;
 
@@ -182,7 +177,6 @@ const Profile: React.FC = () => {
     return (
         <div className="profile-container">
             <div className="profile-layout">
-                {/* Левая колонка - информация о пользователе */}
                 <div className="profile-sidebar">
                     <div className="user-card">
                         <div className="user-avatar">
@@ -193,7 +187,7 @@ const Profile: React.FC = () => {
                                     className="avatar-image"
                                     onError={(e) => {
                                         console.error(
-                                            '❌ Image failed to load:',
+                                            ' Image failed to load:',
                                             user.avatar
                                         );
                                         e.currentTarget.style.display = 'none';
@@ -218,15 +212,14 @@ const Profile: React.FC = () => {
                                 onFollowingClick={() =>
                                     console.log('Show my following modal')
                                 }
-                                showFollowing={true} // Показываем подписки
-                                isCurrentUser={true} // Это текущий пользователь
+                                showFollowing={true}
+                                isCurrentUser={true}
                             />
                         </div>
 
                         <div className="user-info">
-                            {/* Дата рождения и возраст */}
                             <div className="info-item">
-                                <span className="label">🎂 Дата рождения:</span>
+                                <span className="label"> Дата рождения:</span>
                                 <span className="value">
                                     {formatBirthdate(user?.birthdate)}
                                     {user?.birthdate && (
@@ -242,7 +235,6 @@ const Profile: React.FC = () => {
                                 </span>
                             </div>
 
-                            {/* Описание профиля */}
                             {user?.info && (
                                 <div
                                     className="info-item"
@@ -255,7 +247,7 @@ const Profile: React.FC = () => {
                                         className="label"
                                         style={{ marginBottom: '5px' }}
                                     >
-                                        📝 О себе:
+                                        О себе:
                                     </span>
                                     <span
                                         className="value"
@@ -272,7 +264,7 @@ const Profile: React.FC = () => {
 
                             {/* Дата регистрации */}
                             <div className="info-item">
-                                <span className="label">📅 Регистрация:</span>
+                                <span className="label"> Регистрация:</span>
                                 <span className="value">
                                     {user?.createdAt
                                         ? new Date(
@@ -295,7 +287,7 @@ const Profile: React.FC = () => {
                                 onClick={handleLogout}
                                 className="logout-btn"
                             >
-                                🚪 Выйти
+                                Выйти
                             </button>
                         </div>
                     </div>
@@ -316,7 +308,7 @@ const Profile: React.FC = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>🎂 Дата рождения:</label>
+                                    <label> Дата рождения:</label>
                                     <input
                                         type="date"
                                         name="birthdate"
@@ -334,7 +326,7 @@ const Profile: React.FC = () => {
                                 </div>
 
                                 <div className="form-group">
-                                    <label>📝 О себе:</label>
+                                    <label> О себе:</label>
                                     <textarea
                                         name="info"
                                         value={formData.info}
@@ -396,7 +388,7 @@ const Profile: React.FC = () => {
 
                                 <div className="form-buttons">
                                     <button type="submit" className="save-btn">
-                                        💾 Сохранить
+                                        Сохранить
                                     </button>
                                     <button
                                         type="button"
@@ -422,9 +414,7 @@ const Profile: React.FC = () => {
                     )}
                 </div>
 
-                {/* Правая колонка - посты */}
                 <div className="profile-content">
-                    {/* Навигационные табы */}
                     <div className="profile-tabs">
                         <button
                             className={`tab-button ${
@@ -452,10 +442,8 @@ const Profile: React.FC = () => {
                         </button>
                     </div>
 
-                    {/* Создание нового поста */}
                     {activeTab === 'posts' && <CreatePost />}
 
-                    {/* Контент в зависимости от активной вкладки */}
                     {activeTab === 'posts' && <UserPosts />}
                     {activeTab === 'following' && <FollowingPosts />}
                     {activeTab === 'liked' && <LikedPosts />}

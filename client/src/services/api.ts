@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000';
 
-// Добавляем интерфейсы для типизации ответов
 export interface User {
     id: number;
     username: string;
@@ -20,7 +19,6 @@ export interface UserProfileResponse {
     posts: Tweet[];
 }
 
-// Создаем экземпляр axios с базовой конфигурацией
 export const api = axios.create({
     baseURL: API_URL,
 });
@@ -72,7 +70,6 @@ export interface CheckLikeResponse {
     likeId: number | null;
 }
 
-// Добавим в объект api методы для работы с твитами
 export const tweetAPI = {
     createTweet: async (content: string): Promise<CreateTweetResponse> => {
         const response = await api.post<CreateTweetResponse>('/posts', {
@@ -81,7 +78,6 @@ export const tweetAPI = {
         return response.data;
     },
 
-    // Получение постов ТЕКУЩЕГО пользователя
     getMyTweets: async (): Promise<Tweet[]> => {
         const response = await api.get<Tweet[]>('/posts/my-posts');
         return response.data;
@@ -96,7 +92,6 @@ export const tweetAPI = {
         return response.data;
     },
 
-    // Метод для получения всех твитов (если нужно)
     getAllTweets: async (): Promise<Tweet[]> => {
         const response = await api.get<Tweet[]>('/home');
         return response.data;
@@ -140,7 +135,6 @@ api.interceptors.request.use((config) => {
         config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Для FormData не устанавливаем Content-Type - браузер сделает это сам
     if (config.data instanceof FormData) {
         delete config.headers['Content-Type'];
     }
@@ -169,18 +163,19 @@ export const authAPI = {
         email: string,
         password: string
     ): Promise<RegisterResponse> => {
-        const response = await api.post<RegisterResponse>( // ← Используем api вместо axios
-            '/auth/register', // ← Только путь, без полного URL
-            { username, email, password }
-        );
+        const response = await api.post<RegisterResponse>('/auth/register', {
+            username,
+            email,
+            password,
+        });
         return response.data;
     },
 
     login: async (email: string, password: string): Promise<AuthResponse> => {
-        const response = await api.post<AuthResponse>( // ← Используем api вместо axios
-            '/auth/login', // ← Только путь, без полного URL
-            { email, password }
-        );
+        const response = await api.post<AuthResponse>('/auth/login', {
+            email,
+            password,
+        });
         return response.data;
     },
 };
@@ -200,7 +195,6 @@ export const subscriptionAPI = {
         );
         return response.data;
     },
-    // Подписаться на пользователя
     subscribe: async (
         targetUserId: number
     ): Promise<{ message: string; subscription: any }> => {
@@ -210,7 +204,6 @@ export const subscriptionAPI = {
         return response.data;
     },
 
-    // Отписаться от пользователя
     unsubscribe: async (targetUserId: number): Promise<{ message: string }> => {
         const response = await api.post('/subscriptions/unsubscribe', {
             targetUserId,
@@ -218,7 +211,6 @@ export const subscriptionAPI = {
         return response.data;
     },
 
-    // Проверить подписку
     checkSubscription: async (
         targetUserId: number
     ): Promise<{ subscribed: boolean }> => {
@@ -226,7 +218,6 @@ export const subscriptionAPI = {
         return response.data;
     },
 
-    // Получить подписчиков
     getFollowers: async (userId?: number): Promise<{ followers: any[] }> => {
         const url = userId
             ? `/subscriptions/followers/${userId}`
@@ -235,7 +226,6 @@ export const subscriptionAPI = {
         return response.data;
     },
 
-    // Получить подписки
     getFollowing: async (userId?: number): Promise<{ following: any[] }> => {
         const url = userId
             ? `/subscriptions/following/${userId}`
@@ -244,7 +234,6 @@ export const subscriptionAPI = {
         return response.data;
     },
 
-    // Получить статистику подписок
     getSubscriptionStats: async (
         userId: number
     ): Promise<{ followersCount: number; followingCount: number }> => {
@@ -254,13 +243,11 @@ export const subscriptionAPI = {
 };
 
 export const commentAPI = {
-    // Получить комментарии для твита
     getComments: async (tweetId: number): Promise<Comment[]> => {
         const response = await api.get<Comment[]>(`/comments/${tweetId}`);
         return response.data;
     },
 
-    // Создать комментарий
     createComment: async (
         tweetId: number,
         comment: string

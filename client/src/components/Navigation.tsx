@@ -15,7 +15,7 @@ const Navigation: React.FC = () => {
     return (
         <nav
             style={{
-                padding: '0.6rem 1rem', // Уменьшили вертикальный padding
+                padding: '0.6rem 1rem',
                 backgroundColor: '#1da1f2',
                 color: 'white',
                 position: 'fixed',
@@ -24,7 +24,7 @@ const Navigation: React.FC = () => {
                 right: 0,
                 zIndex: 1000,
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                height: '30px', // Фиксированная высота
+                height: '30px',
                 display: 'flex',
                 alignItems: 'center',
             }}
@@ -39,7 +39,6 @@ const Navigation: React.FC = () => {
                     width: '100%',
                 }}
             >
-                {/* Логотип - ссылка на Home */}
                 <Link
                     to="/home"
                     style={{
@@ -60,7 +59,7 @@ const Navigation: React.FC = () => {
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '1.5rem', // Уменьшили gap
+                        gap: '1.5rem',
                     }}
                 >
                     {user.username && (
@@ -102,7 +101,6 @@ const Navigation: React.FC = () => {
                                         objectFit: 'cover',
                                     }}
                                     onError={(e) => {
-                                        // Fallback к эмодзи если изображение не загружается
                                         e.currentTarget.style.display = 'none';
                                     }}
                                 />
@@ -113,12 +111,11 @@ const Navigation: React.FC = () => {
                         </span>
                     )}
 
-                    {/* Кнопка выхода */}
                     {user.id ? (
                         <button
                             onClick={handleLogout}
                             style={{
-                                padding: '6px 12px', // Уменьшили padding
+                                padding: '6px 12px',
                                 backgroundColor: 'transparent',
                                 color: 'white',
                                 border: '1px solid white',
@@ -136,7 +133,7 @@ const Navigation: React.FC = () => {
                                     'transparent';
                             }}
                         >
-                            🚪 Выйти
+                            Выйти
                         </button>
                     ) : (
                         <>
@@ -161,7 +158,7 @@ const Navigation: React.FC = () => {
                                             : 'transparent',
                                 }}
                             >
-                                🔑 Войти
+                                Войти
                             </Link>
                             <Link
                                 to="/register"
@@ -184,7 +181,7 @@ const Navigation: React.FC = () => {
                                             : 'transparent',
                                 }}
                             >
-                                📝 Регистрация
+                                Регистрация
                             </Link>
                         </>
                     )}
