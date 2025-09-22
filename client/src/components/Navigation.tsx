@@ -9,7 +9,8 @@ const Navigation: React.FC = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        navigate('/login');
+
+        window.location.reload();
     };
 
     return (

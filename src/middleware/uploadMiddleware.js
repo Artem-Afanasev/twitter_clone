@@ -7,14 +7,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
-
+const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const uploadDirs = [UPLOADS_DIR, path.join(UPLOADS_DIR, 'avatars')];
 
 uploadDirs.forEach((dir) => {
     if (!fs.existsSync(dir)) {
+        console.log(`Creating directory: ${dir}`);
         fs.mkdirSync(dir, { recursive: true });
-        console.log(`Created directory: ${dir}`);
+    } else {
+        console.log(`Directory already exists: ${dir}`);
     }
 });
 
